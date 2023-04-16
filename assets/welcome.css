@@ -137,18 +137,18 @@
 /*This is the base layer of the earth with the shadows*/
 
 .earth {
-    height: 500px;
-    width: 500px;
+    height: 300px;
+    width: 300px;
     border-radius: 50%;
     background-color: #3380B5;
     position: absolute;
-    top: 100%;
+    top: 70%;
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     overflow: hidden;
     z-index: 2;
-    box-shadow: inset -70px 0px rgba(0, 0, 0, 0.2), 0 0 0 100px rgba(20, 106, 221, 0.1), 0 0 0 200px rgba(20, 106, 221, 0.1), 0 0 0 300px rgba(20, 106, 221, 0.1);
+    box-shadow: inset -70px 0px rgba(0, 0, 0, 0.2), 0 0 0 25px rgba(20, 106, 221, 0.1), 0 0 0 50px rgba(20, 106, 221, 0.1), 0 0 0 75px rgba(20, 106, 221, 0.1);
 }
 
 
@@ -160,8 +160,6 @@
     background: #85C567;
     height: 30px;
     width: 75px;
-    left: 0;
-    top: 50px;
     display: block;
     border-radius: 40px;
     -webkit-animation: rotateElement linear 25s infinite;
@@ -178,8 +176,6 @@
     background: white;
     height: 20px;
     width: 60px;
-    left: 0px;
-    top: 50px;
     display: block;
     border-radius: 40px;
     -webkit-animation: rotateElement linear 15s infinite;
@@ -238,21 +234,21 @@ img {
 
 .rocket {
     position: absolute;
-    top: 19%;
-    width: 80px;
+    top: 5%;
+    width: 40px;
     left: calc(50% - 60px);
     z-index: 2
 }
 
 .rocket .rocket-body {
-    width: 80px;
-    left: calc(50% - 50px);
+    width: 40px;
+    left: calc(50% - 25px);
     animation: bounce 5s infinite;
 }
 
 .rocket .rocket-body .body {
     background-color: #dadada;
-    height: 180px;
+    height: 90px;
     left: calc(50% - 50px);
     border-top-right-radius: 100%;
     border-top-left-radius: 100%;
@@ -264,44 +260,44 @@ img {
 .rocket .rocket-body:before {
     content: '';
     position: absolute;
-    left: calc(50% - 24px);
-    width: 48px;
-    height: 13px;
+    left: calc(50% - 12px);
+    width: 24px;
+    height: 7px;
     background-color: #554842;
-    bottom: -13px;
+    bottom: -7px;
     border-bottom-right-radius: 60%;
     border-bottom-left-radius: 60%;
 }
 
 .rocket .window {
     position: absolute;
-    width: 40px;
-    height: 40px;
+    width: 20px;
+    height: 20px;
     border-radius: 100%;
     background-color: #a75248;
-    left: calc(50% - 25px);
-    top: 40px;
+    left: calc(50% - 10px);
+    top: 20px;
     border: 5px solid #b4b2b2;
 }
 
 .rocket .fin {
     position: absolute;
     z-index: -100;
-    height: 55px;
-    width: 50px;
+    height: 27px;
+    width: 25px;
     background-color: #a75248;
 }
 
 .rocket .fin-left {
-    left: -30px;
-    top: calc(100% - 55px);
+    left: -15px;
+    top: calc(100% - 30px);
     border-top-left-radius: 80%;
     border-bottom-left-radius: 20%;
 }
 
 .rocket .fin-right {
-    right: -30px;
-    top: calc(100% - 55px);
+    right: -15px;
+    top: calc(100% - 30px);
     border-top-right-radius: 80%;
     border-bottom-right-radius: 20%;
 }
@@ -326,71 +322,71 @@ img {
 }
 
 .rocket .exhaust-fumes li:first-child {
-    width: 200px;
-    height: 200px;
-    bottom: -300px;
+    width: 100;
+    height: 100px;
+    bottom: -150px;
     animation: fumes 5s infinite;
 }
 
 .rocket .exhaust-fumes li:nth-child(2) {
-    width: 150px;
-    height: 150px;
-    left: -120px;
-    top: 260px;
+    width: 75px;
+    height: 75px;
+    left: -60px;
+    top: 130px;
     animation: fumes 3.2s infinite;
 }
 
 .rocket .exhaust-fumes li:nth-child(3) {
-    width: 120px;
-    height: 120px;
-    left: -40px;
-    top: 330px;
+    width: 60px;
+    height: 60px;
+    left: -20px;
+    top: 160px;
     animation: fumes 3s 1s infinite;
 }
 
 .rocket .exhaust-fumes li:nth-child(4) {
-    width: 100px;
-    height: 100px;
-    left: -170px;
+    width: 50px;
+    height: 50px;
+    left: -85px;
     animation: fumes 4s 2s infinite;
-    top: 380px;
+    top: 190px;
 }
 
 .rocket .exhaust-fumes li:nth-child(5) {
-    width: 130px;
-    height: 130px;
-    left: -120px;
-    top: 350px;
+    width: 65px;
+    height: 65px;
+    left: -60px;
+    top: 175px;
     animation: fumes 5s infinite;
 }
 
 .rocket .exhaust-fumes li:nth-child(6) {
-    width: 200px;
-    height: 200px;
-    left: -60px;
-    top: 280px;
+    width: 100px;
+    height: 100px;
+    left: -30px;
+    top: 140px;
     animation: fumes2 10s infinite;
 }
 
 .rocket .exhaust-fumes li:nth-child(7) {
-    width: 100px;
-    height: 100px;
-    left: -100px;
-    top: 320px;
+    width: 50px;
+    height: 50px;
+    left: -50px;
+    top: 160px;
 }
 
 .rocket .exhaust-fumes li:nth-child(8) {
-    width: 110px;
-    height: 110px;
-    left: 70px;
-    top: 340px;
+    width: 55px;
+    height: 55px;
+    left: 35px;
+    top: 170px;
 }
 
 .rocket .exhaust-fumes li:nth-child(9) {
-    width: 90px;
-    height: 90px;
-    left: 200px;
-    top: 380px;
+    width: 45px;
+    height: 45px;
+    left: 100px;
+    top: 190px;
     animation: fumes 20s infinite;
 }
 
