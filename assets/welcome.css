@@ -142,7 +142,7 @@
     border-radius: 50%;
     background-color: #3380B5;
     position: absolute;
-    top: 60%;
+    top: 600px;
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
@@ -234,7 +234,7 @@ img {
 
 .rocket {
     position: absolute;
-    top: 20%;
+    top: 200px;
     width: 40px;
     left: calc(50% - 25px);
     z-index: 2
