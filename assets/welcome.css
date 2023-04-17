@@ -91,22 +91,6 @@
     position: inherit;
 }
 
-.face {
-    img {
-        position: relative;
-        max-width: 300px;
-        max-height: 300px;
-        margin-top: -50%;
-        margin-left: -50%;
-        border-radius: 50%;
-    }
-    position:absolute;
-    max-width:45%;
-    max-height:45%;
-    left:50%;
-    overflow:visible;
-    margin-top: 200px;
-}
 
 .heading {
     position: absolute;
@@ -116,11 +100,11 @@
 }
 
 .description {
-    margin-top: -400px;
-    width: 20%px;
-    height: 20%px;
-    margin-left: 20%;
-    margin-right: 20%;
+    margin-top: -100px;
+
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-bottom: 400px;
 }
 
 .description p {

@@ -1,7 +1,7 @@
 {% include space.html %} {% include header.html %} {% if site.layout == 'stacked' %}
-<div class="container-lg py-6 p-responsive text-center">
-    {% include masthead.html metadata=true %}
-
+    <div class="container-lg py-6 p-responsive text-center">
+    <!-- {% include masthead.html metadata=true %} -->
+    
     <div {% if site.style=='dark' %}class="text-white" {% endif %}>
         {{ content }}
     </div>
@@ -10,7 +10,7 @@
         {% include projects.html %}
     </div>
 
-    {% if site.topics %}
+    <!-- {% if site.topics %}
     <div class="my-6">
         {% include interests.html %}
     </div>
@@ -18,7 +18,7 @@
     <div class="my-6">
         {% include thoughts.html %}
     </div>
-    {% endunless %}
+    {% endunless %} -->
 </div>
 {% else %}
 <div class="d-md-flex min-height-full {% unless site.style == 'dark' %}border-md-bottom{% endunless %}">
