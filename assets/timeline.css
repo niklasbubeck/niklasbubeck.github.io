@@ -109,7 +109,7 @@
   
   /* time of the event */
   .time{
-    color: var(--dark-primary);
+    color: var(--secondary-text);
     position: relative;
   }
 
