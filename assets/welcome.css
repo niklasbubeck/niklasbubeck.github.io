@@ -14,7 +14,7 @@
 
 .stars,
 .twinkling,
-.clouds {
+.shootingstars {
     position: absolute;
     display: block;
     top: 0;
@@ -40,11 +40,11 @@
 }
 
 
-/* .clouds {
-    z-index: 3;
-    background: transparent url("./clouds.png") repeat top center;
-    animation: move-clouds-back 200s linear infinite;
-} */
+.shootingstars {
+    z-index: 2;
+    background: transparent url("./images/shooting_star.png") repeat top center;
+    animation: move-twink-back 300s linear infinite;
+}
 
 @keyframes move-twink-back {
     from {
@@ -130,7 +130,7 @@
 
 .description h1 {
     font-size: 36px;
-    color: $dark-primary;
+    color: var(--dark-primary);
 }
 
 
