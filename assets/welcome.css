@@ -123,6 +123,12 @@
 
 #more{display: none;}
 
+.download {
+    margin-top: 10px;
+}
+.download a{
+    color: var(--dark-primary);
+}
 /*This is the base layer of the earth with the shadows*/
 
 .earth {
