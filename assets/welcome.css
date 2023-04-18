@@ -117,6 +117,11 @@
     color: var(--dark-primary);
 }
 
+.story{
+    margin-top: 400px;
+}
+
+#more{display: none;}
 
 /*This is the base layer of the earth with the shadows*/
 

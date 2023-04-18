@@ -10,6 +10,26 @@
     <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/499416/demo.js"></script>
     <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/499416/EasePack.min.js"></script>
     <script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/499416/TweenLite.min.js"></script>
+
+    <script>
+      function myFunction() {
+        var dots = document.getElementById("dots");
+        var moreText = document.getElementById("more");
+        var btnText = document.getElementById("myBtn");
+
+        if (dots.style.display === "none") {
+          dots.style.display = "inline";
+          btnText.innerHTML = "Read more";
+          moreText.style.display = "none";
+        } else {
+          dots.style.display = "none";
+          btnText.innerHTML = "Read less";
+          moreText.style.display = "inline";
+        }
+      }
+
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style></style>
 </head>
@@ -90,6 +110,20 @@
                 But, it's not just limited to these areas, as my fascination with the rapidly evolving realm of artificial intelligence continues to grow. Whether it's exploring cutting-edge algorithms or delving into innovative solutions, I find myself drawn to the limitless potential of today.
             </p>
         </div>
+
+        <div class="story resume">
+          <h1>My Story: </h1>
+          <p>
+            After finishing school, I pursued a degree in medical engineering, which I found appealing due to its interdisciplinary nature, combining computer science, electrical engineering, and materials science. I specialized in imaging techniques and became passionate about programming, leading me to develop a learning platform for students that was hosted on Heroku. <br>
+            <span id="dots">...</span><span id="more">
+            During my studies, I also worked as a working student at Siemens for over two years. In this role, I was responsible for internal testing and worked as a liaison between developers and product owners. It was an invaluable experience that provided me with practical skills and helped me gain a deeper understanding of the industry.<br>
+            
+            In addition to my work at Siemens and my studies, I participated in a student project to build an autonomous race car, which allowed me to develop skills in project management and team leadership. This experience sparked an interest in autonomous systems, leading me to continue my studies with a master's degree in Munich. While there, I worked with a service provider on testing automation for HiL test stations for autonomous driving functions.<br>
+          
+            Currently, I am writing my master's thesis at the AI for Medicine lab, where I am working with cutting-edge medical imaging technologies. In addition to my studies, I remain active in student clubs and organizations, collaborating with fellow students to set and achieve common goals.</span>
+          </p>
+          <button onclick="myFunction()" id="myBtn">Read more</button>
+      </div>
 
         <div class="timeline">
             <div class="outer">
@@ -215,5 +249,4 @@
         </div>
 
 </body>
-
 </html>
