@@ -51,6 +51,9 @@ class ScholarIntegration {
 
         // Extract research interests from paper titles
         const interests = this.extractInterests(data.papers || []);
+        
+        // Extract coauthors from papers
+        const coauthors = this.extractCoauthors(data.papers || [], data.name);
 
         const processedPublications = (data.papers || []).map(paper => ({
             title: paper.title,
@@ -75,7 +78,8 @@ class ScholarIntegration {
                 i10Index: i10Index,
                 paperCount: data.paperCount || 0
             },
-            publications: processedPublications
+            publications: processedPublications,
+            coauthors: coauthors
         };
     }
 
@@ -97,6 +101,38 @@ class ScholarIntegration {
         });
         
         return Array.from(keywords).slice(0, 3);
+    }
+
+    // Extract top coauthors from publications
+    extractCoauthors(papers, authorName) {
+        const coauthorData = new Map();
+        
+        papers.forEach(paper => {
+            if (paper.authors) {
+                paper.authors.forEach(author => {
+                    // Skip the main author
+                    if (author.name && author.name !== authorName) {
+                        const name = author.name;
+                        const authorId = author.authorId;
+                        
+                        if (coauthorData.has(name)) {
+                            coauthorData.get(name).count += 1;
+                        } else {
+                            coauthorData.set(name, {
+                                name: name,
+                                count: 1,
+                                authorId: authorId
+                            });
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Sort by collaboration count and get top 6
+        return Array.from(coauthorData.values())
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 6);
     }
 
 
@@ -125,6 +161,7 @@ class ScholarIntegration {
             this.updateProfileInfo(profileData);
             this.updateStatistics(profileData.citationStats);
             this.updatePublications(profileData.publications);
+            this.updateCoauthors(profileData.coauthors);
             
             console.log('Webpage updated with Semantic Scholar data');
             
@@ -601,7 +638,45 @@ class ScholarIntegration {
         return category;
     }
 
+    // Update coauthors section
+    updateCoauthors(coauthors) {
+        const coauthorsList = document.querySelector('.coauthors-list');
+        if (!coauthorsList) {
+            console.error('Coauthors list element not found!');
+            return;
+        }
 
+        if (!coauthors || coauthors.length === 0) {
+            coauthorsList.innerHTML = '<div class="coauthor-loading">No coauthors found</div>';
+            return;
+        }
+
+        // Clear loading message and populate with coauthors
+        coauthorsList.innerHTML = '';
+        console.log(`Displaying top ${coauthors.length} coauthors from Semantic Scholar`);
+        
+        coauthors.forEach(coauthor => {
+            const coauthorDiv = document.createElement('div');
+            coauthorDiv.className = 'coauthor-item';
+            
+            if (coauthor.authorId) {
+                // Create clickable link to Semantic Scholar profile
+                const link = document.createElement('a');
+                link.href = `https://www.semanticscholar.org/author/${coauthor.authorId}`;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = `${coauthor.name} (${coauthor.count})`;
+                link.style.color = 'inherit';
+                link.style.textDecoration = 'none';
+                coauthorDiv.appendChild(link);
+            } else {
+                // Fallback for authors without ID
+                coauthorDiv.textContent = `${coauthor.name} (${coauthor.count})`;
+            }
+            
+            coauthorsList.appendChild(coauthorDiv);
+        });
+    }
 
     // Setup automatic updates
     setupAutoUpdate() {
