@@ -1,0 +1,504 @@
+
+:root {
+    --primary: #2B2B2B;
+    --dark-primary: #B08D4B;
+    --light-primary: #B08D4B;
+    --text: #B08D4B;
+    --primary-text: #37C0AA;
+    --secondary-text: #757575;
+    --accent: #2B2B2B;
+}
+
+
+
+.stars,
+.twinkling,
+.shootingstars {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.stars {
+    width: 100%;
+    z-index: 0;
+    background: #000 url("../images/starry_sky.jpg") repeat top center;
+    background-size: cover;
+    background-repeat: repeat-y;
+}
+
+.twinkling {
+    z-index: 1;
+    background: transparent url("../images/twinkling.png") repeat top center;
+    animation: move-twink-back 100s linear infinite;
+}
+
+
+.shootingstars {
+    z-index: 2;
+    background: transparent url("../images/shooting_star.png") repeat top center;
+    animation: move-twink-back 300s linear infinite;
+}
+
+@keyframes move-twink-back {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: -10000px 5000px;
+    }
+}
+
+@keyframes move-clouds-back {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 10000px 0;
+    }
+}
+
+
+.heading {
+    position: absolute;
+    z-index: 3;
+    background-color: var(--primary);
+    color: #ECE3CE;
+    top: 60%;
+    left: 0;
+    right: 50; /* Add this to stretch across the full width */
+    display: flex; /* Add this */
+    justify-content: center; /* Add this for horizontal centering */
+    align-items: center; /* Add this for vertical centering */
+    padding: 10px; /* Add some padding for better appearance */
+}
+
+.heading h1 {
+    margin: 0; /* Remove default margin from h1 */
+    text-align: center; /* Ensure text is centered if it wraps */
+}
+
+
+
+/*This is the base layer of the earth with the shadows*/
+
+.earth {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    background-color: #3380B5;
+    position: absolute;
+    top: 600px;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+    z-index: 2;
+    box-shadow: inset -70px 0px rgba(0, 0, 0, 0.2), 0 0 0 25px rgba(20, 106, 221, 0.1), 0 0 0 50px rgba(20, 106, 221, 0.1), 0 0 0 75px rgba(20, 106, 221, 0.1);
+}
+
+
+/*land on the earth is drawn*/
+
+.earth:before {
+    content: "";
+    position: absolute;
+    background: #85C567;
+    height: 30px;
+    width: 75px;
+    display: block;
+    border-radius: 40px;
+    -webkit-animation: rotateElement linear 25s infinite;
+    animation: rotateElement liner 25s infinite;
+    box-shadow: 0px 200px 0 5px #85C567, 5px 35px 0 -3px #85C567, 35px 125px 0 -9px #85C567, 120px -15px 0 -7px #85C567, 135px -55px 0 -9px #85C567, 150px 25px 0 7px #85C567, 220px 70px 0 -2px #85C567, 235px -35px 0 -3px #85C567, 280px 85px 0 3px #85C567, 320px 30px 0 1px #85C567, 400px 0 0 0 #85C567, 400px 75px 0 -5px #85C567, 405px 35px 0 -3px #85C567, 435px 125px 0 -9px #85C567, 520px -15px 0 -7px #85C567, 535px -55px 0 -9px #85C567, 550px 25px 0 7px #85C567, 620px 70px 0 -2px #85C567, 635px -35px 0 -3px #85C567, 680px 85px 0 3px #85C567, 720px 30px 0 1px #85C567;
+}
+
+
+/*clous with the earth are drawn after the earth*/
+
+.earth:after {
+    content: "";
+    position: absolute;
+    background: white;
+    height: 20px;
+    width: 60px;
+    display: block;
+    border-radius: 40px;
+    -webkit-animation: rotateElement linear 15s infinite;
+    animation: rotateElement liner 15s infinite;
+    box-shadow: 10px 50px 0 3px #FFFFFF, 50px -15px 0 2px #FFFFFF, 70px 70px 0 -1px #FFFFFF, 100px 25px 0 1px #FFFFFF, 110px 105px 0 -4px #FFFFFF, 140px 75px 0 -3px #FFFFFF, 250px -25px 0 -1px #FFFFFF, 210px 50px 0 1px #FFFFFF, 340px 130px 0 1px #FFFFFF, 400px 0px 0 0 #FFFFFF, 410px 50px 0 3px #FFFFFF, 500px 25px 0 1px #FFFFFF, 450px -15px 0 2px #FFFFFF, 470px 70px 0 -1px #FFFFFF, 540px 75px 0 -3px #FFFFFF, 510px 105px 0 -4px #FFFFFF, 650px -25px 0 -1px #FFFFFF, 610px 50px 0 1px #FFFFFF, 740px 130px 0 1px #FFFFFF;
+}
+
+section {
+    padding: 100px 0;
+}
+
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+body {
+    font-family: 'Roboto';
+    font-size: 17px;
+    font-weight: 400;
+    background-color: #ECE3CE;
+}
+
+h1 {
+    font-size: 200%;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 400;
+}
+
+header {
+    background: var(--primary);
+    color: var(--text);
+    padding: 150px 0;
+}
+
+header p {
+    font-family: 'Allura';
+    color: rgba(255, 255, 255, .2);
+    margin-bottom: 0;
+    font-size: 60px;
+    margin-top: -30px;
+}
+
+p {
+    font-family: "Allura";
+}
+
+img {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.rocket {
+    position: absolute;
+    top: 200px;
+    width: 40px;
+    left: calc(50% - 25px);
+    z-index: 2
+}
+
+.rocket .rocket-body {
+    width: 60px;
+    left: calc(50% - 25px);
+    animation: bounce 5s infinite;
+}
+
+.rocket .rocket-body .body {
+    background-color: #dadada;
+    height: 120px;
+    left: calc(50% - 50px);
+    border-top-right-radius: 100%;
+    border-top-left-radius: 100%;
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-top: 5px solid #f5f5f5;
+}
+
+.rocket .rocket-body:before {
+    content: '';
+    position: absolute;
+    left: calc(50% - 12px);
+    width: 24px;
+    height: 7px;
+    background-color: #554842;
+    bottom: -7px;
+    border-bottom-right-radius: 60%;
+    border-bottom-left-radius: 60%;
+}
+
+.rocket .window {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    background-color: #a75248;
+    left: calc(50% - 20px);
+    top: 20px;
+    border: 5px solid #b4b2b2;
+    overflow: hidden; /* Add this to clip the image */
+}
+
+.rocket .window img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border-width: 2px;
+    border: 1px solid #a75248;
+}
+
+.rocket .fin {
+    position: absolute;
+    z-index: -100;
+    height: 47px;
+    width: 45px;
+    background-color: #a75248;
+}
+
+.rocket .fin-left {
+    left: -15px;
+    top: calc(100% - 47px);
+    border-top-left-radius: 80%;
+    border-bottom-left-radius: 20%;
+}
+
+.rocket .fin-right {
+    right: -15px;
+    top: calc(100% - 47px);
+    border-top-right-radius: 80%;
+    border-bottom-right-radius: 20%;
+}
+
+.rocket .exhaust-flame {
+    position: absolute;
+    top: 60%;
+    width: 28px;
+    background: linear-gradient(to bottom, transparent 10%, #f5f5f5 60%);
+    height: 150px;
+    left: calc(50% - 5px);
+    animation: exhaust 0.2s infinite;
+}
+
+.rocket .exhaust-fumes li {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(245, 245, 245, 0.96);
+    list-style: none;
+    position: absolute;
+    border-radius: 100%;
+}
+
+.rocket .exhaust-fumes li:first-child {
+    width: 100;
+    height: 100px;
+    bottom: -150px;
+    animation: fumes 5s infinite;
+}
+
+.rocket .exhaust-fumes li:nth-child(2) {
+    width: 75px;
+    height: 75px;
+    left: -60px;
+    top: 130px;
+    animation: fumes 3.2s infinite;
+}
+
+.rocket .exhaust-fumes li:nth-child(3) {
+    width: 60px;
+    height: 60px;
+    left: -20px;
+    top: 160px;
+    animation: fumes 3s 1s infinite;
+}
+
+.rocket .exhaust-fumes li:nth-child(4) {
+    width: 50px;
+    height: 50px;
+    left: -85px;
+    animation: fumes 4s 2s infinite;
+    top: 190px;
+}
+
+.rocket .exhaust-fumes li:nth-child(5) {
+    width: 65px;
+    height: 65px;
+    left: -60px;
+    top: 175px;
+    animation: fumes 5s infinite;
+}
+
+.rocket .exhaust-fumes li:nth-child(6) {
+    width: 100px;
+    height: 100px;
+    left: -30px;
+    top: 140px;
+    animation: fumes2 10s infinite;
+}
+
+.rocket .exhaust-fumes li:nth-child(7) {
+    width: 50px;
+    height: 50px;
+    left: -50px;
+    top: 160px;
+}
+
+.rocket .exhaust-fumes li:nth-child(8) {
+    width: 55px;
+    height: 55px;
+    left: 35px;
+    top: 170px;
+}
+
+.rocket .exhaust-fumes li:nth-child(9) {
+    width: 45px;
+    height: 45px;
+    left: 100px;
+    top: 190px;
+    animation: fumes 20s infinite;
+}
+
+.header {
+    position: absolute;
+    top: 0%;
+    height: 300px;
+    width: 100%;
+    background-color: #2B2B2B;
+}
+
+.header h1 {
+    margin-top: 150px;
+    margin-left: 5%;
+    font-size: 56px;
+}
+
+@keyframes fumes {
+    50% {
+        transform: scale(1.5);
+        background-color: transparent;
+    }
+    51% {
+        transform: scale(0.8);
+    }
+    100% {
+        background-color: rgba(245, 245, 245, 0.8);
+        transform: scale(1);
+    }
+}
+
+@keyframes bounce {
+    0% {
+        transform: translate3d(0px, 0px, 0);
+    }
+    50% {
+        transform: translate3d(0px, -100px, 0);
+    }
+    100% {
+        transform: translate3d(0px, 0px, 0);
+    }
+}
+
+@keyframes bounce2 {
+    0% {
+        transform: translate3d(0px, 0px, 0);
+    }
+    100% {
+        transform: translate3d(0px, -100px, 0);
+    }
+}
+
+@keyframes exhaust {
+    0% {
+        background: linear-gradient(to bottom, transparent 10%, #f5f5f5 100%);
+    }
+    50% {
+        background: linear-gradient(to bottom, transparent 8%, #f5f5f5 100%);
+    }
+    75% {
+        background: linear-gradient(to bottom, transparent 12%, #f5f5f5 100%);
+    }
+}
+
+@keyframes fumes2 {
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes twinkle {
+    80% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        margin-left: 100%;
+        width: 3%;
+    }
+    to {
+        margin-left: 0%;
+        width: 100%;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 500, 0, 0, 1);
+    }
+    3.6% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 336.048, 0, 0, 1);
+    }
+    7.21% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 206.752, 0, 0, 1);
+    }
+    10.81% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 113.278, 0, 0, 1);
+    }
+    14.31% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 52.344, 0, 0, 1);
+    }
+    21.42% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -6.681, 0, 0, 1);
+    }
+    28.53% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -18.423, 0, 0, 1);
+    }
+    48.55% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -3.201, 0, 0, 1);
+    }
+    68.57% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0.351, 0, 0, 1);
+    }
+    100% {
+        transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    }
+}
+
+@keyframes animStar {
+    from {
+        transform: translateY(0px);
+    }
+    to {
+        transform: translateY(-2000px);
+    }
+}
+
+@-webkit-keyframes rotateElement {
+    0% {
+        -webkit-transform: translate(0, 0);
+        transform: translate(0, 0);
+    }
+    100% {
+        -webkit-transform: translate(-400px, 0);
+        transform: translate(-400px, 0);
+    }
+}
+
+@keyframes rotateElement {
+    0% {
+        -webkit-transform: translate(0, 0);
+        transform: translate(0, 0);
+    }
+    100% {
+        -webkit-transform: translate(-400px, 0);
+        transform: translate(-400px, 0);
+    }
+}
