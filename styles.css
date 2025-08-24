@@ -399,6 +399,96 @@ body {
     }
 }
 
+.space-moon {
+    position: absolute;
+    bottom: 10%;
+    right: 15%;
+    width: 150px;
+    height: 150px;
+    background-color: #e8e8e8;
+    border-radius: 50%;
+    z-index: 5;
+    overflow: hidden;
+    box-shadow: 
+        inset -40px 0px rgba(0, 0, 0, 0.3),
+        0 0 0 15px rgba(232, 232, 232, 0.1),
+        0 0 0 30px rgba(232, 232, 232, 0.08),
+        0 0 60px rgba(232, 232, 232, 0.4);
+    animation: moonGlow 4s ease-in-out infinite alternate;
+}
+
+/* Moon craters using the same technique as earth landmasses */
+.space-moon::before {
+    content: "";
+    position: absolute;
+    background: #c0c0c0;
+    height: 15px;
+    width: 25px;
+    display: block;
+    border-radius: 50%;
+    top: 20px;
+    left: 30px;
+    box-shadow: 
+        40px 10px 0 -3px #b8b8b8,
+        15px 40px 0 -5px #c8c8c8,
+        60px 45px 0 -7px #b0b0b0,
+        20px 70px 0 -4px #c0c0c0,
+        70px 25px 0 -2px #b8b8b8,
+        45px 80px 0 -6px #c8c8c8,
+        80px 60px 0 -3px #b0b0b0,
+        10px 100px 0 -8px #c0c0c0,
+        90px 35px 0 -2px #b8b8b8,
+        65px 15px 0 -4px #c8c8c8,
+        35px 110px 0 -5px #b0b0b0,
+        100px 80px 0 -7px #c0c0c0,
+        50px 50px 0 -3px #b8b8b8,
+        85px 90px 0 -4px #c8c8c8,
+        25px 25px 0 -2px #b0b0b0;
+}
+
+/* Moon surface details (smaller craters) */
+.space-moon::after {
+    content: "";
+    position: absolute;
+    background: #a8a8a8;
+    height: 8px;
+    width: 12px;
+    display: block;
+    border-radius: 50%;
+    top: 35px;
+    left: 45px;
+    box-shadow: 
+        25px 15px 0 -2px #a0a0a0,
+        50px 30px 0 -3px #a8a8a8,
+        10px 55px 0 -1px #a0a0a0,
+        40px 65px 0 -2px #a8a8a8,
+        65px 50px 0 -1px #a0a0a0,
+        20px 85px 0 -3px #a8a8a8,
+        55px 85px 0 -2px #a0a0a0,
+        75px 70px 0 -1px #a8a8a8,
+        30px 15px 0 -2px #a0a0a0,
+        60px 10px 0 -1px #a8a8a8,
+        80px 40px 0 -2px #a0a0a0,
+        15px 25px 0 -1px #a8a8a8;
+}
+
+@keyframes moonGlow {
+    0% {
+        box-shadow: 
+            inset -40px 0px rgba(0, 0, 0, 0.3),
+            0 0 0 15px rgba(232, 232, 232, 0.1),
+            0 0 0 30px rgba(232, 232, 232, 0.08),
+            0 0 60px rgba(232, 232, 232, 0.4);
+    }
+    100% {
+        box-shadow: 
+            inset -40px 0px rgba(0, 0, 0, 0.3),
+            0 0 0 15px rgba(232, 232, 232, 0.15),
+            0 0 0 30px rgba(232, 232, 232, 0.12),
+            0 0 80px rgba(232, 232, 232, 0.6);
+    }
+}
+
 .space-motto {
     position: absolute;
     top: 20%;
