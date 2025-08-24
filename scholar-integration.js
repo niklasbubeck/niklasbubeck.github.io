@@ -125,7 +125,6 @@ class ScholarIntegration {
             this.updateProfileInfo(profileData);
             this.updateStatistics(profileData.citationStats);
             this.updatePublications(profileData.publications);
-            this.updateResearchInterests(profileData.interests);
             
             console.log('Webpage updated with Semantic Scholar data');
             
@@ -602,18 +601,7 @@ class ScholarIntegration {
         return category;
     }
 
-    // Update research interests
-    updateResearchInterests(interests) {
-        if (!interests || interests.length === 0) return;
 
-        const researchCards = document.querySelectorAll('.research-card');
-        interests.slice(0, 3).forEach((interest, index) => {
-            if (researchCards[index]) {
-                const titleElement = researchCards[index].querySelector('h3');
-                if (titleElement) titleElement.textContent = interest;
-            }
-        });
-    }
 
     // Setup automatic updates
     setupAutoUpdate() {
