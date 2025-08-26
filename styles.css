@@ -1,3 +1,27 @@
+/* CSS Variables for Theme */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #1f2937;
+    --nav-bg: rgba(255, 255, 255, 0.95);
+    --nav-bg-scrolled: rgba(255, 255, 255, 0.98);
+    --section-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: rgba(229, 231, 235, 0.8);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+    --bg-color: #0f1419;
+    --text-color: #e6e6e6;
+    --nav-bg: rgba(15, 20, 25, 0.95);
+    --nav-bg-scrolled: rgba(15, 20, 25, 0.98);
+    --section-bg: #1a1f2e;
+    --card-bg: #252b3a;
+    --border-color: rgba(75, 85, 99, 0.4);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -13,9 +37,10 @@ html {
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
-    color: #1f2937;
-    background-color: #ffffff;
+    color: var(--text-color);
+    background-color: var(--bg-color);
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Container */
@@ -30,16 +55,16 @@ body {
     position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--nav-bg);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+    border-bottom: 1px solid var(--border-color);
     z-index: 1000;
     transition: all 0.3s ease;
 }
 
 .navbar.scrolled {
-    background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    background: var(--nav-bg-scrolled);
+    box-shadow: 0 4px 20px var(--shadow-color);
 }
 
 .nav-container {
@@ -50,6 +75,32 @@ body {
     justify-content: space-between;
     align-items: center;
     height: 70px;
+}
+
+.nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dark-mode-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.dark-mode-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .nav-logo h2 {
@@ -998,7 +1049,7 @@ section {
 
 /* About Section */
 .about {
-    background: #f9fafb;
+    background: var(--section-bg);
 }
 
 /* Beautiful About Section Links */
@@ -1625,8 +1676,9 @@ section {
 
 .publication-links {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .pub-link {
@@ -1922,9 +1974,10 @@ section {
 
     .publication-links {
         flex-direction: column;
+        gap: 0.5rem;
     }
 
-    .pub-link {
+    .pub-link, .detail-toggle-btn {
         justify-content: center;
     }
 }
@@ -2000,6 +2053,16 @@ section {
     .publications-container {
         max-height: 400px;
         padding: 12px;
+    }
+
+    .publication-links {
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .pub-link, .detail-toggle-btn {
+        justify-content: center;
+        padding: 0.6rem 1rem;
     }
 }
 
@@ -2351,7 +2414,111 @@ section {
     font-weight: 700;
 }
 
+/* Paper Details Styles (TL;DR and Abstract) */
+.paper-details-section {
+    margin: 1rem 0;
+}
 
+.detail-buttons {
+    display: contents; /* This makes the buttons flow directly into the parent flex container */
+}
+
+.detail-toggle-btn {
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: white;
+    text-decoration: none;
+}
+
+.detail-toggle-btn:hover {
+    transform: translateY(-2px);
+}
+
+.detail-toggle-btn i {
+    font-size: 0.8rem;
+}
+
+/* TL;DR Button */
+.tldr-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.tldr-btn:hover {
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Abstract Button */
+.abstract-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.abstract-btn:hover {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.detail-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+    margin-top: 0.5rem;
+}
+
+.detail-content.show {
+    max-height: 300px;
+    opacity: 1;
+}
+
+.detail-text {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-left: 3px solid #667eea;
+    padding: 1rem;
+    border-radius: 8px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+/* PDF Button */
+.pdf-link {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.pdf-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    color: white !important;
+}
+
+/* Abstract specific styling */
+.abstract-content .detail-text {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
+    border-left: 3px solid #f59e0b;
+}
+
+.detail-text strong {
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+.abstract-content .detail-text strong {
+    color: #d97706;
+}
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -2370,3 +2537,320 @@ section {
 ::-webkit-scrollbar-thumb:hover {
     background: #3730a3;
 }
+
+/* Dark Mode Specific Styles */
+body.dark-mode .publication-item {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+body.dark-mode .publication-item h4 {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .publication-authors {
+    color: #b3b3b3 !important;
+}
+
+body.dark-mode .publication-venue {
+    color: #8b5cf6 !important;
+}
+
+body.dark-mode .publication-citations {
+    color: #a1a1aa !important;
+}
+
+body.dark-mode .stat-item {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+body.dark-mode .research-card {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+body.dark-mode .research-card h3 {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .industry-item {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+body.dark-mode .industry-title {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .club-item {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+body.dark-mode .club-title {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .contact {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .contact-item {
+    background: transparent !important;
+    color: var(--text-color) !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+}
+
+body.dark-mode .contact-item h4 {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .industry {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .clubs {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .footer {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .hero {
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .hero-title .name {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .hero-description {
+    color: #b3b3b3 !important;
+}
+
+body.dark-mode .research {
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .publications {
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Dark mode publication container */
+body.dark-mode .publications-container {
+    background: linear-gradient(135deg, rgba(37, 43, 58, 0.9), rgba(26, 31, 46, 0.9)) !important;
+}
+
+body.dark-mode .section-title {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .section-subtitle {
+    color: #b3b3b3 !important;
+}
+
+/* Form elements in dark mode */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #888 !important;
+}
+
+/* Filter buttons in dark mode */
+body.dark-mode .filter-btn {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .filter-btn.active {
+    background: #667eea !important;
+    color: white !important;
+}
+
+/* Navigation links in dark mode */
+body.dark-mode .nav-link {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .nav-logo h2 {
+    color: #8b5cf6 !important;
+}
+
+/* Coauthors section in dark mode */
+body.dark-mode .coauthors-section {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .coauthors-title {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .coauthor-item {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .coauthor-item a {
+    color: #8b5cf6 !important;
+}
+
+/* Additional elements with white backgrounds */
+body.dark-mode .highlight-item {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .highlight-item h4 {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .contact-form {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .contact-form input,
+body.dark-mode .contact-form textarea {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* About section descriptions */
+body.dark-mode .about-description {
+    color: #b3b3b3 !important;
+}
+
+/* Publication controls */
+body.dark-mode .publication-controls {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Pagination controls */
+body.dark-mode .pagination-controls {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .pagination-btn {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .pagination-btn:disabled {
+    background: var(--section-bg) !important;
+    color: #666 !important;
+}
+
+/* Search input */
+body.dark-mode .search-input {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Sort dropdown */
+body.dark-mode .sort-dropdown {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Results counter */
+body.dark-mode .results-counter {
+    color: var(--text-color) !important;
+}
+
+/* Additional comprehensive dark mode fixes */
+body.dark-mode .back-to-top {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .skill-tag,
+body.dark-mode .activity-tag {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .role-item {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .role-item strong {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode .club-roles-timeline {
+    background: var(--section-bg) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .industry-description,
+body.dark-mode .club-description {
+    color: #b3b3b3 !important;
+}
+
+body.dark-mode .industry-company,
+body.dark-mode .industry-period,
+body.dark-mode .industry-location,
+body.dark-mode .club-role,
+body.dark-mode .club-period,
+body.dark-mode .club-location {
+    color: #a1a1aa !important;
+}
+
+/* Ensure all text elements are visible */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: #f0f0f0 !important;
+}
+
+body.dark-mode p {
+    color: var(--text-color) !important;
+}
+
+/* Footer content */
+body.dark-mode .footer-content {
+    color: var(--text-color) !important;
+}
+
+/* Any remaining white divs */
+body.dark-mode div[style*="background: white"],
+body.dark-mode div[style*="background-color: white"],
+body.dark-mode div[style*="background:#ffffff"],
+body.dark-mode div[style*="background-color:#ffffff"] {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+

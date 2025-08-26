@@ -1,6 +1,39 @@
+// Dark Mode functionality
+function initDarkMode() {
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const body = document.body;
+    const icon = darkModeToggle.querySelector('i');
+    
+    // Check for saved theme preference or default to light mode
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        body.classList.add('dark-mode');
+        icon.className = 'fas fa-sun';
+    } else {
+        body.classList.remove('dark-mode');
+        icon.className = 'fas fa-moon';
+    }
+    
+    // Toggle dark mode
+    darkModeToggle.addEventListener('click', function() {
+        body.classList.toggle('dark-mode');
+        
+        if (body.classList.contains('dark-mode')) {
+            icon.className = 'fas fa-sun';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            icon.className = 'fas fa-moon';
+            localStorage.setItem('theme', 'light');
+        }
+    });
+}
+
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all functionality
+    initDarkMode();
     initNavigation();
     initScrollEffects();
     initAnimations();

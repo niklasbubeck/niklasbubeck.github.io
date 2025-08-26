@@ -29,6 +29,8 @@ class ScholarIntegration {
         const fields = 'name,affiliations,homepage,paperCount,citationCount,hIndex,papers.title,papers.authors,papers.venue,papers.year,papers.citationCount,papers.url,papers.openAccessPdf,papers.paperId';
         const url = `${this.apiUrl}/${this.semanticScholarId}?fields=${fields}`;
         
+        console.log('Making API request to:', url);
+        
         const response = await fetch(url);
         
         if (!response.ok) {
@@ -64,7 +66,8 @@ class ScholarIntegration {
             link: paper.openAccessPdf?.url || paper.url || '#',
             publicationUrl: paper.url || '#',
             semanticScholarUrl: paper.paperId ? 
-                `https://www.semanticscholar.org/paper/${paper.paperId}` : '#'
+                `https://www.semanticscholar.org/paper/${paper.paperId}` : '#',
+            tldr: null // Will be fetched asynchronously for each paper
         }));
 
         return {
@@ -133,6 +136,33 @@ class ScholarIntegration {
         return Array.from(coauthorData.values())
             .sort((a, b) => b.count - a.count)
             .slice(0, 6);
+    }
+
+    // Extract paper ID from Semantic Scholar URL
+    extractPaperIdFromUrl(url) {
+        const match = url.match(/\/paper\/([^\/\?]+)/);
+        return match ? match[1] : null;
+    }
+
+    // Fetch TL;DR and abstract for a specific paper
+    async fetchPaperDetails(paperId) {
+        const paperUrl = `https://api.semanticscholar.org/graph/v1/paper/${paperId}?fields=tldr,abstract`;
+        
+        try {
+            const response = await fetch(paperUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return {
+                tldr: data.tldr?.text || null,
+                abstract: data.abstract || null
+            };
+        } catch (error) {
+            console.log(`Failed to fetch details for paper ${paperId}:`, error.message);
+            return { tldr: null, abstract: null };
+        }
     }
 
 
@@ -211,7 +241,9 @@ class ScholarIntegration {
         }
     }
 
-    // Animate individual statistic
+
+
+    // Animate individual statistic (fallback)
     animateStatistic(element, targetValue) {
         if (!element) return;
         
@@ -241,7 +273,7 @@ class ScholarIntegration {
     }
 
     // Update publications section
-    updatePublications(publications) {
+    async updatePublications(publications) {
         const publicationsList = document.querySelector('.publications-list');
         if (!publicationsList) {
             console.error('Publications list element not found!');
@@ -251,7 +283,9 @@ class ScholarIntegration {
         publicationsList.innerHTML = '';
         console.log(`Displaying ${publications.length} publications from Semantic Scholar`);
         
+        // First, display publications without TL;DR
         publications.forEach(pub => {
+            pub.tldr = null; // Initialize as null
             const element = this.createPublicationElement(pub);
             publicationsList.appendChild(element);
         });
@@ -266,6 +300,109 @@ class ScholarIntegration {
             // Reinitialize publication filters after publications are loaded
             this.initPublicationFilters();
         }, 100);
+        
+        // Then, fetch TL;DR data in parallel and update publications
+        this.loadTldrDataForPublications(publications);
+    }
+
+    // Load TL;DR and abstract data for publications asynchronously
+    async loadTldrDataForPublications(publications) {
+        console.log('Loading TL;DR and abstract data for publications...');
+        
+        const detailPromises = publications.map(async (pub, index) => {
+            if (pub.semanticScholarUrl && pub.semanticScholarUrl !== '#') {
+                const paperId = this.extractPaperIdFromUrl(pub.semanticScholarUrl);
+                if (paperId) {
+                    try {
+                        const details = await this.fetchPaperDetails(paperId);
+                        if (details.tldr || details.abstract) {
+                            pub.tldr = details.tldr;
+                            pub.abstract = details.abstract;
+                            // Update the existing publication element with details
+                            this.updatePublicationElementWithDetails(index, details);
+                        }
+                    } catch (error) {
+                        console.log(`Could not fetch details for paper ${paperId}:`, error.message);
+                    }
+                }
+            }
+        });
+        
+        // Wait for all detail requests to complete (or fail)
+        await Promise.all(detailPromises);
+        console.log('TL;DR and abstract loading completed');
+    }
+
+    // Update a specific publication element with TL;DR and abstract data
+    updatePublicationElementWithDetails(publicationIndex, details) {
+        const publicationItems = document.querySelectorAll('.publication-item');
+        const targetItem = publicationItems[publicationIndex];
+        
+        if (targetItem && (details.tldr || details.abstract)) {
+            // Check if details section already exists
+            let detailsSection = targetItem.querySelector('.paper-details-section');
+            if (!detailsSection) {
+                // Create and insert details section
+                detailsSection = document.createElement('div');
+                detailsSection.className = 'paper-details-section';
+                
+                let buttonsHtml = '';
+                let contentHtml = '';
+                
+                // Add TL;DR if available
+                if (details.tldr) {
+                    buttonsHtml += `
+                        <button class="detail-toggle-btn tldr-btn" onclick="this.closest('.publication-item').querySelector('.tldr-content').classList.toggle('show'); this.textContent = this.textContent.includes('Show') ? 'Hide TL;DR' : 'Show TL;DR';">
+                            <i class="fas fa-lightbulb"></i> Show TL;DR
+                        </button>
+                    `;
+                    contentHtml += `
+                        <div class="tldr-content detail-content">
+                            <div class="detail-text">
+                                <strong>TL;DR:</strong> ${details.tldr}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Add Abstract if available
+                if (details.abstract) {
+                    buttonsHtml += `
+                        <button class="detail-toggle-btn abstract-btn" onclick="this.closest('.publication-item').querySelector('.abstract-content').classList.toggle('show'); this.textContent = this.textContent.includes('Show') ? 'Hide Abstract' : 'Show Abstract';">
+                            <i class="fas fa-file-text"></i> Show Abstract
+                        </button>
+                    `;
+                    contentHtml += `
+                        <div class="abstract-content detail-content">
+                            <div class="detail-text">
+                                <strong>Abstract:</strong> ${details.abstract}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                detailsSection.innerHTML = `
+                    <div class="detail-buttons">
+                        ${buttonsHtml}
+                    </div>
+                    ${contentHtml}
+                `;
+                
+                // Insert the detail buttons into the existing publication-links section
+                const linksSection = targetItem.querySelector('.publication-links');
+                if (linksSection) {
+                    // Add detail buttons to the links section
+                    const detailButtons = detailsSection.querySelector('.detail-buttons');
+                    linksSection.appendChild(detailButtons);
+                    
+                    // Insert content sections before the links section
+                    const contentElements = detailsSection.querySelectorAll('.detail-content');
+                    contentElements.forEach(content => {
+                        linksSection.parentNode.insertBefore(content, linksSection);
+                    });
+                }
+            }
+        }
     }
 
     // Initialize publication filters for dynamically loaded content
@@ -586,12 +723,21 @@ class ScholarIntegration {
                     Cited by ${publication.citedBy || 0} 
                     ${publication.year ? `• ${new Date().getFullYear() - publication.year} years ago` : ''}
                 </p>
+                ${publication.tldr ? `
+                    <div class="tldr-section">
+                        <button class="tldr-toggle-btn" onclick="this.closest('.publication-item').querySelector('.tldr-content').classList.toggle('show'); this.textContent = this.textContent.includes('Show') ? 'Hide TL;DR' : 'Show TL;DR';">
+                            <i class="fas fa-lightbulb"></i> Show TL;DR
+                        </button>
+                        <div class="tldr-content">
+                            <div class="tldr-text">
+                                <strong>TL;DR:</strong> ${publication.tldr}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
                 <div class="publication-links">
-                    ${publication.link !== '#' ? `<a href="${publication.link}" class="pub-link" target="_blank">
+                    ${publication.link !== '#' ? `<a href="${publication.link}" class="pub-link pdf-link" target="_blank">
                         <i class="fas fa-file-pdf"></i> PDF
-                    </a>` : ''}
-                    ${publication.semanticScholarUrl !== '#' ? `<a href="${publication.semanticScholarUrl}" class="pub-link" target="_blank">
-                        <i class="fas fa-brain"></i> Semantic Scholar
                     </a>` : ''}
                 </div>
             </div>
