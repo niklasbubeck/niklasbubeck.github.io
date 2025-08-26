@@ -356,10 +356,19 @@ function initBackToTop() {
         });
         
         backToTopButton.addEventListener('click', function() {
+            // Add launching class to trigger rocket animation
+            backToTopButton.classList.add('launching');
+            
+            // Start scrolling to top
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
+            
+            // Remove launching class after animation completes
+            setTimeout(() => {
+                backToTopButton.classList.remove('launching');
+            }, 2000); // Match the 2s animation duration
         });
     }
 }
