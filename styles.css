@@ -2108,6 +2108,47 @@ section {
         width: 90%;
     }
 
+    /* Make rocket smaller on mobile */
+    .space-rocket {
+        width: 45px;
+        height: 90px;
+        top: 18%;
+        right: 8%;
+    }
+
+    .space-rocket .rocket-body {
+        width: 45px;
+        height: 90px;
+    }
+
+    .space-rocket .rocket-window {
+        width: 30px;
+        height: 30px;
+        left: calc(50% - 15px);
+        top: 15px;
+    }
+
+    .space-rocket .rocket-fin-left,
+    .space-rocket .rocket-fin-right {
+        height: 35px;
+        width: 34px;
+        top: calc(100% - 35px);
+    }
+
+    .space-rocket .rocket-fin-left {
+        left: -11px;
+    }
+
+    .space-rocket .rocket-fin-right {
+        right: -11px;
+    }
+
+    .space-rocket .rocket-exhaust {
+        width: 21px;
+        height: 60px;
+        left: calc(50% - 10.5px);
+    }
+
     .about-content {
         grid-template-columns: 1fr;
         gap: 2rem;
@@ -2201,10 +2242,43 @@ section {
 
     /* Further simplify space elements for very small screens */
     .space-rocket {
-        width: 40px;
-        height: 80px;
+        width: 35px;
+        height: 70px;
         top: 20%;
         right: 5%;
+    }
+
+    .space-rocket .rocket-body {
+        width: 35px;
+        height: 70px;
+    }
+
+    .space-rocket .rocket-window {
+        width: 24px;
+        height: 24px;
+        left: calc(50% - 12px);
+        top: 12px;
+    }
+
+    .space-rocket .rocket-fin-left,
+    .space-rocket .rocket-fin-right {
+        height: 28px;
+        width: 26px;
+        top: calc(100% - 28px);
+    }
+
+    .space-rocket .rocket-fin-left {
+        left: -9px;
+    }
+
+    .space-rocket .rocket-fin-right {
+        right: -9px;
+    }
+
+    .space-rocket .rocket-exhaust {
+        width: 18px;
+        height: 45px;
+        left: calc(50% - 9px);
     }
 
     .space-motto {
