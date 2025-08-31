@@ -2053,6 +2053,18 @@ section {
         display: flex;
     }
 
+    /* Center dark mode button on mobile */
+    .nav-container {
+        position: relative;
+    }
+
+    .nav-controls {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+
     .hamburger.active .bar:nth-child(2) {
         opacity: 0;
     }
