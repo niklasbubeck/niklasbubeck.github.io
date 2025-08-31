@@ -2080,6 +2080,22 @@ section {
         height: 250px;
     }
 
+    /* Hide complex space elements on mobile for better performance and clarity */
+    .space-earth,
+    .space-moon {
+        display: none !important;
+    }
+
+    /* Adjust space motto positioning for mobile */
+    .space-motto {
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%) rotate(0deg);
+        font-size: 1.5rem;
+        text-align: center;
+        width: 90%;
+    }
+
     .about-content {
         grid-template-columns: 1fr;
         gap: 2rem;
@@ -2099,13 +2115,38 @@ section {
         gap: 2rem;
     }
 
+    /* Mobile responsive publication controls */
+    .publication-controls {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 20px;
+    }
+
     .publication-filters {
         gap: 0.5rem;
+        justify-content: center;
     }
 
     .filter-btn {
         padding: 0.4rem 1rem;
         font-size: 0.9rem;
+    }
+
+    .publication-search {
+        justify-content: center;
+    }
+
+    .search-input {
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .publication-sort {
+        justify-content: center;
+    }
+
+    .results-counter {
+        text-align: center;
     }
 
     .social-links {
@@ -2144,6 +2185,25 @@ section {
     .profile-img {
         width: 200px;
         height: 200px;
+    }
+
+    /* Further simplify space elements for very small screens */
+    .space-rocket {
+        width: 40px;
+        height: 80px;
+        top: 20%;
+        right: 5%;
+    }
+
+    .space-motto {
+        font-size: 1.2rem;
+        letter-spacing: 1px;
+        top: 8%;
+    }
+
+    /* Reduce shooting stars on very small screens */
+    .shooting-star:nth-child(3) {
+        display: none;
     }
 
     .about-stats {
@@ -2243,6 +2303,27 @@ section {
     .pub-link, .detail-toggle-btn {
         justify-content: center;
         padding: 0.6rem 1rem;
+    }
+
+    /* Extra small screen adjustments for publication controls */
+    .publication-controls {
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .search-input {
+        max-width: 250px;
+        font-size: 14px;
+    }
+
+    .filter-btn {
+        padding: 0.35rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .sort-dropdown {
+        font-size: 13px;
+        padding: 6px 12px;
     }
 }
 
@@ -3033,6 +3114,27 @@ body.dark-mode div[style*="background:#ffffff"],
 body.dark-mode div[style*="background-color:#ffffff"] {
     background: var(--card-bg) !important;
     color: var(--text-color) !important;
+}
+
+/* TL;DR and Abstract dark mode fixes */
+body.dark-mode .detail-text {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2)) !important;
+    color: var(--text-color) !important;
+    border-left: 3px solid #8b5cf6 !important;
+}
+
+body.dark-mode .abstract-content .detail-text {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2)) !important;
+    color: var(--text-color) !important;
+    border-left: 3px solid #f59e0b !important;
+}
+
+body.dark-mode .detail-text strong {
+    color: #8b5cf6 !important;
+}
+
+body.dark-mode .abstract-content .detail-text strong {
+    color: #fbbf24 !important;
 }
 
 
