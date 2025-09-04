@@ -2471,7 +2471,7 @@ section {
 
 .timeline-nav-btn.active {
     border-color: #667eea;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    /* background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); */
     box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
     transform: scale(1.1);
 }
