@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initPublicationFilters();
     // initStatsCounter(); // Removed - handled by Semantic Scholar integration
     initBackToTop();
+    initTimeline();
     updateLastModified();
 });
 
@@ -502,6 +503,50 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
+// Timeline functionality
+function initTimeline() {
+    let currentStep = 0;
+    const totalSteps = 4;
+    
+    const navButtons = document.querySelectorAll('.timeline-nav-btn');
+    const contentItems = document.querySelectorAll('.timeline-content-item');
+    
+    // Initialize timeline
+    updateTimeline();
+    
+    // Navigation button clicks
+    navButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            currentStep = index;
+            updateTimeline();
+        });
+    });
+    
+    // Update timeline display
+    function updateTimeline() {
+        // Update navigation buttons
+        navButtons.forEach((btn, index) => {
+            btn.classList.toggle('active', index === currentStep);
+        });
+        
+        // Update content items
+        contentItems.forEach((item, index) => {
+            item.classList.toggle('active', index === currentStep);
+        });
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' && currentStep > 0) {
+            currentStep--;
+            updateTimeline();
+        } else if (e.key === 'ArrowRight' && currentStep < totalSteps - 1) {
+            currentStep++;
+            updateTimeline();
+        }
+    });
+    
+    console.log('Timeline initialized with', totalSteps, 'steps');
+}
 
 

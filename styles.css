@@ -2413,321 +2413,323 @@ section {
     }
 }
 
-/* Industry Section */
-.industry {
+/* Timeline Section - Interactive Design */
+.timeline {
     background: #f8fafc;
     color: #1f2937;
     padding: 100px 0;
     position: relative;
 }
 
-.industry-content {
+/* Timeline Navigation */
+.timeline-nav {
     position: relative;
-    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem auto 4rem auto;
+    max-width: 800px;
+    padding: 0 60px;
 }
 
-.industry-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
+.timeline-nav::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 60px;
+    right: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+    border-radius: 2px;
+    z-index: 0;
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.timeline-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    min-height: 100px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-nav-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.timeline-nav-btn.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    transform: scale(1.1);
+}
+
+.nav-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: white;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    margin-bottom: 0.3rem;
+}
+
+.nav-icon.industry {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.nav-icon.academic {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.nav-text {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #1f2937;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.nav-year {
+    font-size: 0.7rem;
+    color: #6b7280;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Timeline Content */
+.timeline-content-wrapper {
+    position: relative;
+    min-height: 400px;
+    overflow: hidden;
+}
+
+.timeline-content-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+}
+
+.timeline-content-item.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+}
+
+.timeline-main-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
     max-width: 800px;
     margin: 0 auto;
-}
-
-.industry-item {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 15px;
-    padding: 1.25rem;
-    display: flex;
-    gap: 1rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.industry-item:hover {
+.timeline-main-card:hover {
     transform: translateY(-5px);
-    background: white;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-color: #4f46e5;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-.industry-icon {
-    flex-shrink: 0;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 12px;
+.card-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-}
-
-.industry-info {
-    flex: 1;
-}
-
-.industry-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    color: #1f2937;
-    line-height: 1.2;
-}
-
-.industry-company {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4f46e5;
-    margin-bottom: 0.15rem;
-}
-
-.industry-period {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-bottom: 0.25rem;
-}
-
-.industry-location {
-    font-size: 0.8rem;
-    color: #9ca3af;
-    margin-bottom: 0.75rem;
-    font-style: italic;
-    display: flex;
-    align-items: center;
-}
-
-.industry-location::before {
-    content: '📍';
-    margin-right: 4px;
-    font-size: 0.7rem;
-}
-
-.industry-description {
-    line-height: 1.4;
-    margin-bottom: 1rem;
-    color: #4b5563;
-    font-size: 0.9rem;
-}
-
-.industry-skills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-}
-
-.skill-tag {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    line-height: 1.3;
-}
-
-/* Clubs Section */
-.clubs {
-    background: #f8fafc;
-    padding: 100px 0;
-}
-
-.clubs-content {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.clubs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
     gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.club-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    cursor: pointer;
-    position: relative;
-}
-
-.club-item {
-    background: white;
-    border-radius: 15px;
-    padding: 1.25rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
-}
-
-.club-link:hover .club-item,
-.club-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-color: #4f46e5;
-}
-
-.club-link:hover {
-    text-decoration: none;
-    color: inherit;
-}
-
-/* Add external link indicator */
-.club-link::before {
-    content: '🔗';
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 0.9rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 10;
-}
-
-.club-link:hover::before {
-    opacity: 0.7;
-}
-
-.club-header {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-
-.club-icon {
-    flex-shrink: 0;
-    width: 45px;
-    height: 45px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 12px;
+.company-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.8rem;
     color: white;
+    border: 3px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
 }
 
-.club-meta {
+.company-icon.industry {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.company-icon.academic {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.company-info {
     flex: 1;
 }
 
-.club-title {
-    font-size: 1.1rem;
+.company-name {
+    font-size: 1.8rem;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.5rem;
     line-height: 1.2;
 }
 
-.club-role {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #4f46e5;
-    margin-bottom: 0.1rem;
+.company-role {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #667eea;
+    margin-bottom: 0.25rem;
 }
 
-.club-period {
-    font-size: 0.8rem;
+.company-period {
+    font-size: 0.9rem;
     color: #6b7280;
+    font-weight: 500;
 }
 
-.club-location {
-    font-size: 0.75rem;
-    color: #9ca3af;
-    font-style: italic;
-    margin-top: 0.15rem;
+.card-content {
+    line-height: 1.6;
 }
 
-.club-roles-timeline {
-    background: #f9fafb;
-    border-radius: 6px;
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
-    border-left: 3px solid #667eea;
-}
-
-.role-item {
-    font-size: 0.8rem;
+.company-description {
+    font-size: 1rem;
     color: #4b5563;
-    margin-bottom: 0.3rem;
-    padding-left: 0.4rem;
-    line-height: 1.3;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
 }
 
-.role-item:last-child {
-    margin-bottom: 0;
-}
-
-.role-item strong {
-    color: #1f2937;
-    font-weight: 600;
-}
-
-.club-description {
-    line-height: 1.4;
-    color: #4b5563;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-}
-
-.club-activities {
+.company-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem;
+    gap: 0.5rem;
 }
 
-.activity-tag {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
+.tag {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
-/* Responsive Design for New Sections */
+.tag.industry {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.tag.academic {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+
+
+/* Responsive Design for Interactive Timeline */
 @media (max-width: 768px) {
-    .industry-item {
+    .timeline {
+        padding: 60px 0;
+    }
+    
+    .timeline-nav {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 0 20px;
+        max-width: 400px;
+    }
+    
+    .timeline-nav::before {
+        display: none;
+    }
+    
+    .timeline-nav-btn {
+        min-width: 80px;
+        min-height: 80px;
+        padding: 0.75rem;
+    }
+    
+    .nav-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .nav-text {
+        font-size: 0.7rem;
+    }
+    
+    .nav-year {
+        font-size: 0.65rem;
+    }
+    
+    .timeline-main-card {
+        padding: 1.5rem;
+    }
+    
+    .card-header {
         flex-direction: column;
         text-align: center;
         gap: 1rem;
     }
-
-    .industry-icon {
-        align-self: center;
+    
+    .company-name {
+        font-size: 1.5rem;
     }
-
-    .clubs-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .club-item {
-        padding: 1.5rem;
+    
+    .company-role {
+        font-size: 1rem;
     }
 }
 
 @media (max-width: 480px) {
-    .industry {
-        padding: 60px 0;
+    .timeline {
+        padding: 40px 0;
     }
-
-    .clubs {
-        padding: 60px 0;
+    
+    .timeline-nav {
+        grid-template-columns: 1fr;
     }
-
-    .industry-item {
-        padding: 1.5rem;
+    
+    .timeline-main-card {
+        padding: 1rem;
     }
-
-    .industry-skills {
+    
+    .company-name {
+        font-size: 1.3rem;
+    }
+    
+    .company-description {
+        font-size: 0.9rem;
+    }
+    
+    .company-tags {
         justify-content: center;
     }
-
-    .club-activities {
-        justify-content: center;
+    
+    .control-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
     }
 }
 
@@ -2924,25 +2926,57 @@ body.dark-mode .research-card h3 {
     color: #f0f0f0 !important;
 }
 
-body.dark-mode .industry-item {
-    background: var(--card-bg) !important;
+/* Timeline Dark Mode Styles */
+body.dark-mode .timeline {
+    background: var(--section-bg) !important;
     color: var(--text-color) !important;
-    box-shadow: 0 2px 10px var(--shadow-color);
 }
 
-body.dark-mode .industry-title {
+body.dark-mode .timeline-nav-btn {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .timeline-nav-btn:hover {
+    border-color: #8b5cf6 !important;
+}
+
+body.dark-mode .timeline-nav-btn.active {
+    border-color: #8b5cf6 !important;
+    /* background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.1)) !important; */
+}
+
+body.dark-mode .nav-text {
     color: #f0f0f0 !important;
 }
 
-body.dark-mode .club-item {
-    background: var(--card-bg) !important;
-    color: var(--text-color) !important;
-    box-shadow: 0 2px 10px var(--shadow-color);
+body.dark-mode .nav-year {
+    color: #a1a1aa !important;
 }
 
-body.dark-mode .club-title {
+body.dark-mode .timeline-main-card {
+    background: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .company-name {
     color: #f0f0f0 !important;
 }
+
+body.dark-mode .company-role {
+    color: #8b5cf6 !important;
+}
+
+body.dark-mode .company-period {
+    color: #a1a1aa !important;
+}
+
+body.dark-mode .company-description {
+    color: #b3b3b3 !important;
+}
+
 
 body.dark-mode .contact {
     background: var(--section-bg) !important;
@@ -2960,15 +2994,6 @@ body.dark-mode .contact-item h4 {
     color: #f0f0f0 !important;
 }
 
-body.dark-mode .industry {
-    background: var(--section-bg) !important;
-    color: var(--text-color) !important;
-}
-
-body.dark-mode .clubs {
-    background: var(--section-bg) !important;
-    color: var(--text-color) !important;
-}
 
 body.dark-mode .footer {
     background: var(--section-bg) !important;
@@ -3141,38 +3166,6 @@ body.dark-mode .back-to-top {
     border-color: var(--border-color) !important;
 }
 
-body.dark-mode .skill-tag,
-body.dark-mode .activity-tag {
-    background: var(--section-bg) !important;
-    color: var(--text-color) !important;
-}
-
-body.dark-mode .role-item {
-    color: var(--text-color) !important;
-}
-
-body.dark-mode .role-item strong {
-    color: #f0f0f0 !important;
-}
-
-body.dark-mode .club-roles-timeline {
-    background: var(--section-bg) !important;
-    color: var(--text-color) !important;
-}
-
-body.dark-mode .industry-description,
-body.dark-mode .club-description {
-    color: #b3b3b3 !important;
-}
-
-body.dark-mode .industry-company,
-body.dark-mode .industry-period,
-body.dark-mode .industry-location,
-body.dark-mode .club-role,
-body.dark-mode .club-period,
-body.dark-mode .club-location {
-    color: #a1a1aa !important;
-}
 
 /* Ensure all text elements are visible */
 body.dark-mode h1,
