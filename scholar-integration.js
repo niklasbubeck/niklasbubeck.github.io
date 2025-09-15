@@ -47,10 +47,9 @@ class ScholarIntegration {
     processData(data) {
         console.log('Processing', data.papers?.length || 0, 'papers from Semantic Scholar');
         
-        // Calculate i10-index
-        const i10Index = data.papers ? 
-            data.papers.filter(paper => paper.citationCount >= 10).length : 0;
-
+        // Calculate citation statistics manually from paper data
+        const citationStats = this.calculateCitationStats(data.papers || []);
+        
         // Extract research interests from paper titles
         const interests = this.extractInterests(data.papers || []);
         
@@ -75,14 +74,57 @@ class ScholarIntegration {
             affiliation: data.affiliations?.[0]?.name || 'Technical University of Munich',
             homepage: data.homepage || '',
             interests: interests,
-            citationStats: {
-                totalCitations: data.citationCount || 0,
-                hIndex: data.hIndex || 0,
-                i10Index: i10Index,
-                paperCount: data.paperCount || 0
-            },
+            citationStats: citationStats,
             publications: processedPublications,
             coauthors: coauthors
+        };
+    }
+
+    // Calculate citation statistics manually from paper data
+    calculateCitationStats(papers) {
+        if (!papers || papers.length === 0) {
+            return {
+                totalCitations: 0,
+                hIndex: 0,
+                i10Index: 0,
+                paperCount: 0
+            };
+        }
+
+        // Calculate total citations by summing individual paper citations
+        const totalCitations = papers.reduce((sum, paper) => sum + (paper.citationCount || 0), 0);
+        
+        // Calculate h-index
+        // Sort papers by citation count in descending order
+        const sortedPapers = papers
+            .map(paper => paper.citationCount || 0)
+            .sort((a, b) => b - a);
+        
+        let hIndex = 0;
+        for (let i = 0; i < sortedPapers.length; i++) {
+            if (sortedPapers[i] >= i + 1) {
+                hIndex = i + 1;
+            } else {
+                break;
+            }
+        }
+        
+        // Calculate i10-index (papers with at least 10 citations)
+        const i10Index = papers.filter(paper => (paper.citationCount || 0) >= 10).length;
+        
+        console.log('Calculated citation stats:', {
+            totalCitations,
+            hIndex,
+            i10Index,
+            paperCount: papers.length,
+            paperCitations: papers.map(p => p.citationCount || 0)
+        });
+
+        return {
+            totalCitations,
+            hIndex,
+            i10Index,
+            paperCount: papers.length
         };
     }
 
