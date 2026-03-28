@@ -84,7 +84,7 @@ body {
 }
 
 .dark-mode-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3380B5 0%, #255e8a 100%);
     border: none;
     color: white;
     width: 40px;
@@ -100,11 +100,11 @@ body {
 
 .dark-mode-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(51, 128, 181, 0.3);
 }
 
 .nav-logo h2 {
-    color: #4f46e5;
+    color: #3380B5;
     font-weight: 600;
     font-size: 1.5rem;
 }
@@ -125,7 +125,7 @@ body {
 
 .nav-link:hover,
 .nav-link.active {
-    color: #4f46e5;
+    color: #3380B5;
 }
 
 .nav-link::after {
@@ -135,7 +135,7 @@ body {
     left: 0;
     width: 0;
     height: 2px;
-    background: #4f46e5;
+    background: #3380B5;
     transition: width 0.3s ease;
 }
 
@@ -1036,7 +1036,7 @@ section {
     transform: translateX(-50%);
     width: 60px;
     height: 4px;
-    background: linear-gradient(45deg, #4f46e5, #7c3aed);
+    background: linear-gradient(45deg, #3380B5, #255e8a);
     border-radius: 2px;
 }
 
@@ -1054,11 +1054,11 @@ section {
 
 /* Beautiful About Section Links */
 .about-description a {
-    color: #4f46e5;
+    color: #3380B5;
     text-decoration: none;
     font-weight: 600;
     position: relative;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1077,7 +1077,7 @@ section {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    background: linear-gradient(135deg, rgba(51, 128, 181, 0.1), rgba(37, 94, 138, 0.1));
     border-radius: 4px;
     opacity: 0;
     transition: all 0.3s ease;
@@ -1091,7 +1091,7 @@ section {
 
 .about-description a:hover {
     transform: translateY(-1px);
-    text-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    text-shadow: 0 2px 8px rgba(51, 128, 181, 0.3);
 }
 
 /* Different styling for external vs internal links */
@@ -1102,7 +1102,7 @@ section {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     transition: width 0.3s ease;
     border-radius: 1px;
 }
@@ -1125,7 +1125,7 @@ section {
     font-size: 0.8em;
     opacity: 0.7;
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -1143,7 +1143,7 @@ section {
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     transition: width 0.3s ease;
     border-radius: 1px;
 }
@@ -1199,7 +1199,7 @@ section {
 
 .highlight-item i {
     font-size: 1.5rem;
-    color: #4f46e5;
+    color: #3380B5;
     min-width: 24px;
 }
 
@@ -1239,7 +1239,7 @@ section {
 .stat-number {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #4f46e5;
+    color: #3380B5;
     margin-bottom: 0.5rem;
 }
 
@@ -1277,7 +1277,7 @@ section {
 }
 
 .coauthor-item {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     color: white;
     padding: 0.6rem 1.2rem;
     border-radius: 15px;
@@ -1333,7 +1333,7 @@ section {
 .research-icon {
     width: 60px;
     height: 60px;
-    background: linear-gradient(45deg, #4f46e5, #7c3aed);
+    background: linear-gradient(45deg, #3380B5, #255e8a);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -1453,7 +1453,7 @@ section {
     border-radius: 50%;
     border: 1px solid #e5e7eb;
     background: rgba(255, 255, 255, 0.95);
-    color: #4f46e5;
+    color: #3380B5;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1512,7 +1512,7 @@ section {
 }
 
 .github-carousel-dot-active {
-    background: #4f46e5;
+    background: #3380B5;
     transform: scale(1.15);
 }
 
@@ -1564,7 +1564,7 @@ section {
 
 .github-project-lang {
     font-weight: 600;
-    color: #4f46e5;
+    color: #3380B5;
 }
 
 .github-project-tags {
@@ -1611,7 +1611,7 @@ section {
 }
 
 .publication-controls {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3380B5 0%, #255e8a 100%);
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 3rem;
@@ -1654,7 +1654,7 @@ section {
 }
 
 .sort-dropdown option {
-    background: #4f46e5;
+    background: #3380B5;
     color: white;
 }
 
@@ -1743,7 +1743,7 @@ section {
 .filter-btn.active {
     background: rgba(255,255,255,0.9);
     border-color: rgba(255,255,255,1);
-    color: #4f46e5;
+    color: #3380B5;
     font-weight: 600;
     box-shadow: 0 5px 20px rgba(255,255,255,0.3);
 }
@@ -1756,13 +1756,13 @@ section {
     gap: 20px;
     margin-bottom: 20px;
     padding: 20px;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    background: linear-gradient(135deg, rgba(51, 128, 181, 0.1), rgba(37, 94, 138, 0.1));
     border-radius: 12px;
     backdrop-filter: blur(10px);
 }
 
 .pagination-btn {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     color: white;
     border: none;
     padding: 12px 20px;
@@ -1774,12 +1774,12 @@ section {
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(51, 128, 181, 0.3);
 }
 
 .pagination-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(51, 128, 181, 0.4);
 }
 
 .pagination-btn:disabled {
@@ -1792,7 +1792,7 @@ section {
 .pagination-info {
     font-size: 16px;
     font-weight: 600;
-    color: #4f46e5;
+    color: #3380B5;
     padding: 8px 16px;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 8px;
@@ -1822,7 +1822,7 @@ section {
 }
 
 .publications-container::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #3380B5, #255e8a);
     border-radius: 4px;
 }
 
@@ -1841,7 +1841,7 @@ section {
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    border-left: 4px solid #4f46e5;
+    border-left: 4px solid #3380B5;
     transition: all 0.3s ease;
     display: flex;
     gap: 1.5rem;
@@ -1891,7 +1891,7 @@ section {
 }
 
 .publication-venue {
-    color: #4f46e5;
+    color: #3380B5;
     font-weight: 500;
     margin-bottom: 1rem;
 }
@@ -1923,7 +1923,7 @@ section {
 }
 
 .pub-link:hover {
-    background: #4f46e5;
+    background: #3380B5;
     color: white;
 }
 
@@ -1948,7 +1948,7 @@ section {
 .contact-icon {
     width: 50px;
     height: 50px;
-    background: linear-gradient(45deg, #4f46e5, #7c3aed);
+    background: linear-gradient(45deg, #3380B5, #255e8a);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -1992,7 +1992,7 @@ section {
 }
 
 .social-link:hover {
-    background: #4f46e5;
+    background: #3380B5;
     color: white;
     transform: translateY(-2px);
 }
@@ -2022,7 +2022,7 @@ section {
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #4f46e5;
+    border-color: #3380B5;
 }
 
 .form-group textarea {
@@ -2053,7 +2053,7 @@ section {
     right: 2rem;
     width: 50px;
     height: 50px;
-    background: #4f46e5;
+    background: #3380B5;
     color: white;
     border: none;
     border-radius: 50%;
@@ -2666,10 +2666,10 @@ section {
     left: 60px;
     right: 60px;
     height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+    background: linear-gradient(90deg, #3380B5 0%, #255e8a 50%, #3380B5 100%);
     border-radius: 2px;
     z-index: 0;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 10px rgba(51, 128, 181, 0.3);
 }
 
 .timeline-nav-btn {
@@ -2691,15 +2691,15 @@ section {
 }
 
 .timeline-nav-btn:hover {
-    border-color: #667eea;
+    border-color: #3380B5;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 15px rgba(51, 128, 181, 0.2);
 }
 
 .timeline-nav-btn.active {
-    border-color: #667eea;
-    /* background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); */
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    border-color: #3380B5;
+    /* background: linear-gradient(135deg, rgba(51, 128, 181, 0.1), rgba(37, 94, 138, 0.1)); */
+    box-shadow: 0 6px 25px rgba(51, 128, 181, 0.4);
     transform: scale(1.1);
 }
 
@@ -2722,7 +2722,7 @@ section {
 }
 
 .nav-icon.academic {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #7CB05B, #4a7a30);
 }
 
 .nav-text {
@@ -2808,7 +2808,7 @@ section {
 }
 
 .company-icon.academic {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #7CB05B, #4a7a30);
 }
 
 .company-info {
@@ -2826,7 +2826,7 @@ section {
 .company-role {
     font-size: 1.1rem;
     font-weight: 500;
-    color: #667eea;
+    color: #3380B5;
     margin-bottom: 0.25rem;
 }
 
@@ -2867,7 +2867,7 @@ section {
 }
 
 .tag.academic {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: linear-gradient(135deg, #7CB05B, #4a7a30);
     color: white;
 }
 
@@ -2978,7 +2978,7 @@ section {
 }
 
 .publication-citations i {
-    color: #4f46e5;
+    color: #3380B5;
 }
 
 .publication-item .publication-authors strong {
@@ -3024,11 +3024,11 @@ section {
 
 /* TL;DR Button */
 .tldr-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3380B5 0%, #255e8a 100%);
 }
 
 .tldr-btn:hover {
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(51, 128, 181, 0.3);
 }
 
 /* Abstract Button */
@@ -3054,8 +3054,8 @@ section {
 }
 
 .detail-text {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    border-left: 3px solid #667eea;
+    background: linear-gradient(135deg, rgba(51, 128, 181, 0.1), rgba(37, 94, 138, 0.1));
+    border-left: 3px solid #3380B5;
     padding: 1rem;
     border-radius: 8px;
     line-height: 1.5;
@@ -3088,7 +3088,7 @@ section {
 }
 
 .detail-text strong {
-    color: #4f46e5;
+    color: #3380B5;
     font-weight: 600;
 }
 
@@ -3106,7 +3106,7 @@ section {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #4f46e5;
+    background: #3380B5;
     border-radius: 4px;
 }
 
@@ -3342,7 +3342,7 @@ body.dark-mode .filter-btn {
 }
 
 body.dark-mode .filter-btn.active {
-    background: #667eea !important;
+    background: #3380B5 !important;
     color: white !important;
 }
 
@@ -3405,7 +3405,7 @@ body.dark-mode .about-description {
 
 /* Publication controls */
 body.dark-mode .publication-controls {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #3380B5 0%, #255e8a 100%) !important;
 }
 
 /* Pagination controls */
@@ -3481,7 +3481,7 @@ body.dark-mode div[style*="background-color:#ffffff"] {
 
 /* TL;DR and Abstract dark mode fixes */
 body.dark-mode .detail-text {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2)) !important;
+    background: linear-gradient(135deg, rgba(51, 128, 181, 0.2), rgba(37, 94, 138, 0.2)) !important;
     color: var(--text-color) !important;
     border-left: 3px solid #8b5cf6 !important;
 }
@@ -3501,3 +3501,549 @@ body.dark-mode .abstract-content .detail-text strong {
 }
 
 
+/* ================================================================
+   TOPIC-SPECIFIC THEME ELEMENTS
+   ================================================================ */
+
+/* ---- 1. CARDIAC MRI — ECG heartbeat ---- */
+
+.research-card-cardiac {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(167, 82, 72, 0.3) !important;
+}
+
+.research-card-cardiac:hover {
+    border-color: rgba(167, 82, 72, 0.55) !important;
+    box-shadow: 0 20px 40px rgba(167, 82, 72, 0.12) !important;
+}
+
+/* ECG trace sweeping across the card bottom */
+.cardiac-ecg-bg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 0 0 16px 16px;
+    pointer-events: none;
+    opacity: 0.18;
+}
+
+.ecg-svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 800px;
+    height: 50px;
+    animation: ecgScroll 1.2s linear infinite;
+}
+
+.ecg-path {
+    stroke: #a75248; /* rocket-fin terracotta */
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@keyframes ecgScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-400px); }
+}
+
+/* Cardiac icon — red gradient + beating heart */
+.cardiac-icon {
+    background: linear-gradient(45deg, #dc2626, #ef4444) !important;
+    overflow: visible !important;
+    position: relative;
+}
+
+.cardiac-heart-beat {
+    animation: heartBeat 1.2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    14%       { transform: scale(1.35); }
+    28%       { transform: scale(1.05); }
+    42%       { transform: scale(1.2); }
+    70%       { transform: scale(1); }
+}
+
+/* Expanding pulse rings synced to the heartbeat */
+.heart-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    border: 2px solid rgba(239, 68, 68, 0.85);
+    pointer-events: none;
+}
+
+.heart-pulse-ring.r1 { animation: heartRing 1.2s ease-out infinite; }
+.heart-pulse-ring.r2 { animation: heartRing 1.2s ease-out 0.6s infinite; }
+
+@keyframes heartRing {
+    0%   { transform: scale(1);   opacity: 0.75; }
+    100% { transform: scale(2.6); opacity: 0; }
+}
+
+body.dark-mode .cardiac-ecg-bg { opacity: 0.28; }
+
+/* ---- 2. GENERATIVE AI — Neural Network ---- */
+
+.genai-icon {
+    background: linear-gradient(45deg, #255e8a, #a855f7) !important;
+    overflow: visible !important;
+}
+
+.neural-net-svg {
+    width: 42px;
+    height: 42px;
+}
+
+.nn-conn {
+    stroke: rgba(255, 255, 255, 0.55);
+    stroke-width: 1.2;
+    fill: none;
+    stroke-dasharray: 3 2;
+    animation: nnConnFlow 1.8s linear infinite;
+}
+
+.nc1 { animation-delay: 0.0s; }
+.nc2 { animation-delay: 0.2s; }
+.nc3 { animation-delay: 0.4s; }
+.nc4 { animation-delay: 0.6s; }
+.nc5 { animation-delay: 0.8s; }
+.nc6 { animation-delay: 1.0s; }
+.nc7 { animation-delay: 0.3s; }
+.nc8 { animation-delay: 0.7s; }
+.nc9 { animation-delay: 1.1s; }
+
+@keyframes nnConnFlow {
+    0%   { stroke-dashoffset: 0;   opacity: 0.35; }
+    50%  {                          opacity: 0.9; }
+    100% { stroke-dashoffset: -15; opacity: 0.35; }
+}
+
+.nn-node {
+    fill: rgba(255, 255, 255, 0.9);
+    animation: nnNodeGlow 1.8s ease-in-out infinite;
+}
+
+.nni1 { animation-delay: 0.0s; }
+.nni2 { animation-delay: 0.3s; }
+.nnh1 { animation-delay: 0.6s; }
+.nnh2 { animation-delay: 0.9s; }
+.nnh3 { animation-delay: 1.2s; }
+.nno1 { animation-delay: 1.5s; }
+
+@keyframes nnNodeGlow {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
+}
+
+/* Speed up on card hover */
+.research-card-genai:hover .nn-conn { animation-duration: 0.9s; }
+.research-card-genai:hover .nn-node { animation-duration: 0.9s; }
+
+/* ---- 3. TOKENIZATION — Data compression ---- */
+
+.token-icon {
+    background: linear-gradient(45deg, #0891b2, #06b6d4) !important;
+}
+
+.token-svg {
+    width: 42px;
+    height: 42px;
+}
+
+/* Input blocks pulse in sequence like data streaming in */
+.tok-blk { fill: rgba(255, 255, 255, 0.88); }
+
+.tb1 { animation: tokFlow 2s ease-in-out 0.0s infinite; }
+.tb2 { animation: tokFlow 2s ease-in-out 0.2s infinite; }
+.tb3 { animation: tokFlow 2s ease-in-out 0.4s infinite; }
+.tb4 { animation: tokFlow 2s ease-in-out 0.6s infinite; }
+
+@keyframes tokFlow {
+    0%, 100% { opacity: 0.45; }
+    30%       { opacity: 1; }
+    60%       { opacity: 0.7; }
+}
+
+/* Arrow flashes when data "compresses" */
+.tok-arrow {
+    stroke: rgba(255, 255, 255, 0.85);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: tokArrowPulse 2s ease-in-out 0.8s infinite;
+}
+
+@keyframes tokArrowPulse {
+    0%, 100% { opacity: 0.45; }
+    50%       { opacity: 1; }
+}
+
+/* Output blocks — outline style, glow when filled */
+.tok-out {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.85);
+    stroke-width: 1.5;
+}
+
+.to1 { animation: tokOutPulse 2s ease-in-out 1.1s infinite; }
+.to2 { animation: tokOutPulse 2s ease-in-out 1.4s infinite; }
+
+@keyframes tokOutPulse {
+    0%, 100% { opacity: 0.35; stroke-width: 1;   }
+    55%       { opacity: 1;    stroke-width: 2;   }
+}
+
+/* ---- 4. HIGH-OCTANE MOTORSPORTS — Formula Student Car ---- */
+
+/* ---- SVG Formula 1 Car ---- */
+
+.fc-icon-wrap {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc-nav-wrap {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SVG sizing */
+.fc-car-svg {
+    display: block;
+    overflow: visible;
+}
+
+.fc-car-large {
+    width: 66px;
+    height: 44px;
+}
+
+.fc-car-mini {
+    width: 33px;
+    height: 22px;
+}
+
+/* SVG shape fills */
+.fc-white  { fill: rgba(255, 255, 255, 0.92); }
+.fc-dark   { fill: rgba(0,   0,   0,   0.30); }
+.fc-accent { fill: rgba(255, 255, 255, 0.70); }
+
+/* Halo — stroke only */
+.fc-halo {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.80);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+}
+
+/* Wheels — exposed open-wheel look */
+.fc-wheel {
+    fill: rgba(255, 255, 255, 0.12);
+    stroke: rgba(255, 255, 255, 0.90);
+    stroke-width: 2.2;
+}
+
+/* Hub centre */
+.fc-hub {
+    fill: rgba(255, 255, 255, 0.55);
+}
+
+/* Speed / motion blur lines */
+.fc-speed-line {
+    stroke: rgba(255, 255, 255, 0.80);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    opacity: 0;
+    animation: fcSpeedLine 0.85s linear infinite;
+}
+
+.sl1 { animation-delay: 0.00s; }
+.sl2 { animation-delay: 0.22s; }
+.sl3 { animation-delay: 0.44s; }
+
+@keyframes fcSpeedLine {
+    0%   { transform: translateX(0);    opacity: 0; }
+    15%  { opacity: 1; }
+    80%  { opacity: 0.75; }
+    100% { transform: translateX(72px); opacity: 0; }
+}
+
+/* ---- 5. TUM.ai — AI Constellation ---- */
+
+/* Company icon (70 × 70 circle) */
+.cn-icon-wrap {
+    position: relative;
+}
+
+/* SVG connection lines overlay */
+.cn-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 70px; height: 70px;
+    pointer-events: none;
+}
+
+.cn-line {
+    stroke: rgba(255, 255, 255, 0.42);
+    stroke-width: 1;
+    fill: none;
+    stroke-dasharray: 3 2;
+    animation: cnLinePulse 2.5s linear infinite;
+}
+
+.cnl1 { animation-delay: 0.00s; }
+.cnl2 { animation-delay: 0.36s; }
+.cnl3 { animation-delay: 0.72s; }
+.cnl4 { animation-delay: 1.08s; }
+.cnl5 { animation-delay: 1.44s; }
+.cnl6 { animation-delay: 1.80s; }
+.cnl7 { animation-delay: 2.16s; }
+
+@keyframes cnLinePulse {
+    0%   { stroke-dashoffset: 0;   opacity: 0.3; }
+    50%  {                          opacity: 0.85; }
+    100% { stroke-dashoffset: -20; opacity: 0.3; }
+}
+
+/* Star-nodes — pulse like actual stars */
+.cn-node {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    transform: translate(-50%, -50%);
+    animation: cnNodeTwinkle 2.5s ease-in-out infinite;
+}
+
+.cn1 { width: 8px;  height: 8px;  left: 14px; top: 22px; animation-delay: 0.0s; }
+.cn2 { width: 8px;  height: 8px;  left: 14px; top: 48px; animation-delay: 0.5s; }
+.cn3 { width: 7px;  height: 7px;  left: 35px; top: 14px; animation-delay: 1.0s; }
+.cn4 { width: 10px; height: 10px; left: 35px; top: 35px; animation-delay: 1.5s; }
+.cn5 { width: 7px;  height: 7px;  left: 35px; top: 56px; animation-delay: 2.0s; }
+.cn6 { width: 10px; height: 10px; left: 56px; top: 35px; animation-delay: 2.5s; }
+
+@keyframes cnNodeTwinkle {
+    0%, 100% { opacity: 0.55; box-shadow: 0 0 0   0   rgba(255,255,255,0); }
+    50%       { opacity: 1;   box-shadow: 0 0 8px 3px rgba(255,255,255,0.45); }
+}
+
+/* Nav button mini constellation (35 × 35 circle) */
+.cn-nav-wrap {
+    position: relative;
+}
+
+.cn-nav-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 35px; height: 35px;
+    pointer-events: none;
+}
+
+.cn-nav-line {
+    stroke: rgba(255, 255, 255, 0.55);
+    stroke-width: 1;
+    fill: none;
+    stroke-dasharray: 2 2;
+    animation: cnLinePulse 2s linear infinite;
+}
+
+.cn-nav-node {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    transform: translate(-50%, -50%);
+    animation: cnNodeTwinkle 2s ease-in-out infinite;
+}
+
+.cnn1 { width: 5px; height: 5px; left: 8px;  top: 10px; animation-delay: 0.0s; }
+.cnn2 { width: 5px; height: 5px; left: 8px;  top: 26px; animation-delay: 0.5s; }
+.cnn3 { width: 6px; height: 6px; left: 18px; top: 18px; animation-delay: 1.0s; }
+.cnn4 { width: 5px; height: 5px; left: 28px; top: 18px; animation-delay: 0.3s; }
+
+/* ================================================================
+   FULL-WIDTH CARD HEADERS WITH 3D POLYGON ILLUSTRATIONS
+   ================================================================ */
+
+/* Base header — breaks out of card padding, spans full width */
+.rc-header {
+    margin: -2.5rem -2.5rem 1.5rem;
+    border-radius: 16px 16px 0 0;
+    height: 185px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Subtle dark backgrounds — flat tones derived from space scene colors */
+.rc-header-cardiac {
+    background: linear-gradient(160deg, #221008 0%, #160806 100%);
+}
+
+.rc-header-genai {
+    background: linear-gradient(160deg, #0c1e30 0%, #071018 100%);
+}
+
+.rc-header-token {
+    background: linear-gradient(160deg, #101e06 0%, #080e04 100%);
+}
+
+/* ---- Polygonal 3D Heart ---- */
+
+.poly-heart-wrap {
+    position: relative;
+    z-index: 2;
+    animation: polyHeartBeat 4s ease-in-out infinite;
+}
+
+.poly-heart-svg {
+    width: 155px;
+    height: 135px;
+    display: block;
+}
+
+/* Combined heartbeat pulse + gentle 3-D rock */
+@keyframes polyHeartBeat {
+    0%         { transform: perspective(600px) rotateY(-18deg) rotateX(8deg)  scale(1);    }
+    8%         { transform: perspective(600px) rotateY(-14deg) rotateX(10deg) scale(1.10); }
+    16%        { transform: perspective(600px) rotateY(-16deg) rotateX(8deg)  scale(1.02); }
+    24%        { transform: perspective(600px) rotateY(-12deg) rotateX(9deg)  scale(1.07); }
+    48%        { transform: perspective(600px) rotateY(10deg)  rotateX(-5deg) scale(1.01); }
+    100%       { transform: perspective(600px) rotateY(-18deg) rotateX(8deg)  scale(1);    }
+}
+
+/* ECG trace sits at the bottom of the cardiac header */
+.rc-header-cardiac .cardiac-ecg-bg {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50px;
+    overflow: hidden;
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+/* ---- Polygonal 3D Neural Network ---- */
+
+.poly-nn-wrap {
+    position: relative;
+    z-index: 2;
+    animation: polyNNFloat 7s ease-in-out infinite;
+}
+
+.poly-nn-svg {
+    width: 220px;
+    height: 180px;
+    display: block;
+}
+
+@keyframes polyNNFloat {
+    0%, 100% { transform: perspective(600px) rotateY(-14deg) rotateX(6deg); }
+    50%       { transform: perspective(600px) rotateY(14deg)  rotateX(-6deg); }
+}
+
+/* Connection lines — animated signal flow, earth-ocean blue tint */
+.nn3d-conn {
+    stroke: rgba(51, 128, 181, 0.45);
+    stroke-width: 1;
+    stroke-dasharray: 5 4;
+    animation: nn3dSignal 2.4s linear infinite;
+}
+
+.nc1  { animation-delay: 0.0s; } .nc2  { animation-delay: 0.2s; }
+.nc3  { animation-delay: 0.4s; } .nc4  { animation-delay: 0.6s; }
+.nc5  { animation-delay: 0.8s; } .nc6  { animation-delay: 1.0s; }
+.nc7  { animation-delay: 1.2s; } .nc8  { animation-delay: 1.4s; }
+.nc9  { animation-delay: 1.6s; } .nc10 { animation-delay: 0.3s; }
+.nc11 { animation-delay: 0.9s; } .nc12 { animation-delay: 1.5s; }
+
+@keyframes nn3dSignal {
+    0%   { stroke-dashoffset: 0;   opacity: 0.3; }
+    50%  {                          opacity: 0.85; }
+    100% { stroke-dashoffset: -18; opacity: 0.3; }
+}
+
+/* Diamond polygon faces — top half lighter, bottom half darker */
+.nn3d-top { animation: nn3dNodeGlow 2.4s ease-in-out infinite; }
+.nn3d-bot { animation: nn3dNodeGlow 2.4s ease-in-out infinite; opacity: 0.85; }
+
+@keyframes nn3dNodeGlow {
+    0%, 100% { opacity: 0.65; }
+    50%       { opacity: 1; }
+}
+
+/* ---- Isometric 3D Tokenization Cubes ---- */
+
+.poly-token-wrap {
+    position: relative;
+    z-index: 2;
+    animation: polyTokenRock 8s ease-in-out infinite;
+}
+
+.poly-token-svg {
+    width: 260px;
+    height: 145px;
+    display: block;
+}
+
+@keyframes polyTokenRock {
+    0%, 100% { transform: perspective(600px) rotateX(10deg) rotateY(-10deg); }
+    50%       { transform: perspective(600px) rotateX(5deg)  rotateY(6deg); }
+}
+
+/* Input cubes — sequential pulse (data streaming in) */
+.tok3d-input   { animation: tok3dIn 2.5s ease-in-out infinite; }
+.tok3d-input-1 { animation-delay: 0.0s; }
+.tok3d-input-2 { animation-delay: 0.35s; }
+.tok3d-input-3 { animation-delay: 0.7s; }
+
+@keyframes tok3dIn {
+    0%, 100% { opacity: 0.45; }
+    25%       { opacity: 1; }
+    50%       { opacity: 0.65; }
+}
+
+/* Arrow beam pulses as data compresses */
+.tok3d-arrow { animation: tok3dArrow 2.5s ease-in-out 1.0s infinite; }
+
+@keyframes tok3dArrow {
+    0%, 100% { opacity: 0.35; }
+    50%       { opacity: 1; }
+}
+
+/* Output cube glows brighter after compression */
+.tok3d-output { animation: tok3dOut 2.5s ease-in-out 1.4s infinite; }
+
+@keyframes tok3dOut {
+    0%, 100% { opacity: 0.55; }
+    50%       { opacity: 1; }
+}
+
+/* ---- Dark mode tweaks for headers ---- */
+body.dark-mode .rc-header-cardiac { background: linear-gradient(160deg, #180a06 0%, #0f0503 100%); }
+body.dark-mode .rc-header-genai   { background: linear-gradient(160deg, #081422 0%, #040b14 100%); }
+body.dark-mode .rc-header-token   { background: linear-gradient(160deg, #0a1404 0%, #060a03 100%); }
+
+/* Research card text spacing in new layout */
+.research-card-cardiac h3,
+.research-card-genai   h3,
+.research-card-token   h3 {
+    margin-top: 0;
+}

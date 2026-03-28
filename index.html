@@ -206,9 +206,29 @@
                 <p class="section-subtitle">Exploring the frontiers of knowledge</p>
             </div>
             <div class="research-grid">
-                <div class="research-card">
-                    <div class="research-icon">
-                        <i class="fas fa-heart"></i>
+                <!-- ★ Cardiac MRI — full-width header with 3D polygonal heart + ECG -->
+                <div class="research-card research-card-cardiac">
+                    <div class="rc-header rc-header-cardiac">
+                        <div class="cardiac-ecg-bg">
+                            <svg class="ecg-svg" viewBox="0 0 800 50" xmlns="http://www.w3.org/2000/svg">
+                                <path class="ecg-path" d="M0,25 L50,25 L60,18 L70,25 L95,25 L100,35 L105,2 L110,38 L115,25 L140,25 L155,14 L170,25 L400,25 L450,25 L460,18 L470,25 L495,25 L500,35 L505,2 L510,38 L515,25 L540,25 L555,14 L570,25 L800,25"/>
+                            </svg>
+                        </div>
+                        <div class="poly-heart-wrap">
+                            <svg class="poly-heart-svg" viewBox="0 0 200 175" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Triangulated low-poly heart — palette derived from rocket-fin #a75248 -->
+                                <polygon points="100,165 52,125 100,100"  fill="#6e3028"/><!-- T1  lower-left -->
+                                <polygon points="52,125 22,85 100,100"    fill="#3a1410"/><!-- T2  far-left   -->
+                                <polygon points="22,85 48,48 100,100"     fill="#522018"/><!-- T3  upper-left -->
+                                <polygon points="48,48 82,26 100,48"      fill="#a75248"/><!-- T4  left-lobe  -->
+                                <polygon points="48,48 100,48 100,100"    fill="#8b4238"/><!-- T5  left-mid   -->
+                                <polygon points="100,48 118,26 152,48"    fill="#c08878"/><!-- T6  right-lobe -->
+                                <polygon points="100,48 152,48 100,100"   fill="#d4a090"/><!-- T7  highlight  -->
+                                <polygon points="152,48 178,85 100,100"   fill="#c08878"/><!-- T8  upper-right-->
+                                <polygon points="178,85 148,125 100,100"  fill="#a75248"/><!-- T9  right      -->
+                                <polygon points="148,125 100,165 100,100" fill="#7a3a2c"/><!-- T10 lower-right-->
+                            </svg>
+                        </div>
                     </div>
                     <h3>Cardiac MRI</h3>
                     <p>Conducting research on innovative artificial intelligence techniques to enhance cardiac MRI, focusing on improving image reconstruction quality and achieving higher resolution through state-of-the-art superresolution algorithms.</p>
@@ -218,9 +238,44 @@
                         <li>Superresolution</li>
                     </ul>
                 </div>
-                <div class="research-card">
-                    <div class="research-icon">
-                        <i class="fas fa-brain"></i>
+
+                <!-- ★ Generative AI — full-width header with 3D polygonal neural network -->
+                <div class="research-card research-card-genai">
+                    <div class="rc-header rc-header-genai">
+                        <div class="poly-nn-wrap">
+                            <svg class="poly-nn-svg" viewBox="0 0 200 165" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Connection lines (behind nodes) -->
+                                <line class="nn3d-conn nc1" x1="40" y1="35"  x2="110" y2="35"/>
+                                <line class="nn3d-conn nc2" x1="40" y1="35"  x2="110" y2="82"/>
+                                <line class="nn3d-conn nc3" x1="40" y1="35"  x2="110" y2="129"/>
+                                <line class="nn3d-conn nc4" x1="40" y1="82"  x2="110" y2="35"/>
+                                <line class="nn3d-conn nc5" x1="40" y1="82"  x2="110" y2="82"/>
+                                <line class="nn3d-conn nc6" x1="40" y1="82"  x2="110" y2="129"/>
+                                <line class="nn3d-conn nc7" x1="40" y1="129" x2="110" y2="35"/>
+                                <line class="nn3d-conn nc8" x1="40" y1="129" x2="110" y2="82"/>
+                                <line class="nn3d-conn nc9" x1="40" y1="129" x2="110" y2="129"/>
+                                <line class="nn3d-conn nc10" x1="110" y1="35"  x2="170" y2="82"/>
+                                <line class="nn3d-conn nc11" x1="110" y1="82"  x2="170" y2="82"/>
+                                <line class="nn3d-conn nc12" x1="110" y1="129" x2="170" y2="82"/>
+                                <!-- Input nodes — diamond polygons, palette from earth ocean #3380B5 -->
+                                <polygon class="nn3d-top" points="40,22 53,35 27,35" fill="#9ac2e0"/>
+                                <polygon class="nn3d-bot" points="27,35 53,35 40,48" fill="#1a4880"/>
+                                <polygon class="nn3d-top" points="40,69 53,82 27,82" fill="#9ac2e0"/>
+                                <polygon class="nn3d-bot" points="27,82 53,82 40,95" fill="#1a4880"/>
+                                <polygon class="nn3d-top" points="40,116 53,129 27,129" fill="#9ac2e0"/>
+                                <polygon class="nn3d-bot" points="27,129 53,129 40,142" fill="#1a4880"/>
+                                <!-- Hidden nodes — diamond polygons (r=11) -->
+                                <polygon class="nn3d-top" points="110,24 121,35 99,35" fill="#6ba8d0"/>
+                                <polygon class="nn3d-bot" points="99,35 121,35 110,46" fill="#1e5590"/>
+                                <polygon class="nn3d-top" points="110,71 121,82 99,82" fill="#6ba8d0"/>
+                                <polygon class="nn3d-bot" points="99,82 121,82 110,93" fill="#1e5590"/>
+                                <polygon class="nn3d-top" points="110,118 121,129 99,129" fill="#6ba8d0"/>
+                                <polygon class="nn3d-bot" points="99,129 121,129 110,140" fill="#1e5590"/>
+                                <!-- Output node — diamond (r=13) -->
+                                <polygon class="nn3d-top" points="170,69 183,82 157,82" fill="#c5dff0"/>
+                                <polygon class="nn3d-bot" points="157,82 183,82 170,95" fill="#0e3060"/>
+                            </svg>
+                        </div>
                     </div>
                     <h3>Generative AI</h3>
                     <p>Applying diffusion models and generative AI to healthcare and medical imaging, with a focus on exploring the spectrum between reconstruction and generation.</p>
@@ -230,9 +285,41 @@
                         <li>Diffusion Models</li>
                     </ul>
                 </div>
-                <div class="research-card">
-                    <div class="research-icon">
-                        <i class="fas fa-robot"></i>
+
+                <!-- ★ Tokenization — full-width header with isometric 3D cubes -->
+                <div class="research-card research-card-token">
+                    <div class="rc-header rc-header-token">
+                        <div class="poly-token-wrap">
+                            <svg class="poly-token-svg" viewBox="0 0 280 155" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Input cubes — palette from earth landmass #85C567 / #7CB05B / #6B9B4F -->
+                                <g class="tok3d-input tok3d-input-1">
+                                    <polygon points="45,10 61,19 45,28 29,19" fill="#c8e8a0"/>
+                                    <polygon points="61,19 61,37 45,46 45,28" fill="#85C567"/>
+                                    <polygon points="29,19 45,28 45,46 29,37" fill="#4a6e32"/>
+                                </g>
+                                <g class="tok3d-input tok3d-input-2">
+                                    <polygon points="45,57 61,66 45,75 29,66" fill="#c8e8a0"/>
+                                    <polygon points="61,66 61,84 45,93 45,75" fill="#85C567"/>
+                                    <polygon points="29,66 45,75 45,93 29,84" fill="#4a6e32"/>
+                                </g>
+                                <g class="tok3d-input tok3d-input-3">
+                                    <polygon points="45,104 61,113 45,122 29,113" fill="#c8e8a0"/>
+                                    <polygon points="61,113 61,131 45,140 45,122" fill="#85C567"/>
+                                    <polygon points="29,113 45,122 45,140 29,131" fill="#4a6e32"/>
+                                </g>
+                                <!-- Compression arrow -->
+                                <g class="tok3d-arrow">
+                                    <line x1="90" y1="78" x2="148" y2="78" stroke="#a8d97a" stroke-width="2.5" stroke-linecap="round"/>
+                                    <polygon points="144,72 156,78 144,84" fill="#a8d97a"/>
+                                </g>
+                                <!-- Output cube — slightly brighter/warmer green glow -->
+                                <g class="tok3d-output">
+                                    <polygon points="195,42 218,55 195,68 172,55" fill="#d8f0b0"/>
+                                    <polygon points="218,55 218,81 195,94 195,68" fill="#7CB05B"/>
+                                    <polygon points="172,55 195,68 195,94 172,81" fill="#4a7a30"/>
+                                </g>
+                            </svg>
+                        </div>
                     </div>
                     <h3>Tokenization</h3>
                     <p>Developing advanced techniques to tokenize high-dimensional medical data, enabling more effective use of generative AI models in healthcare applications.</p>
