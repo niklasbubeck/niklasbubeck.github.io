@@ -38,10 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollEffects();
     initAnimations();
     initContactForm();
-    initPublicationFilters();
     // initStatsCounter(); // Removed - handled by Semantic Scholar integration
     initBackToTop();
-    initTimeline();
     updateLastModified();
 });
 
@@ -271,34 +269,6 @@ function showNotification(message, type) {
     }, 5000);
 }
 
-// Publication filters
-function initPublicationFilters() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const publicationItems = document.querySelectorAll('.publication-item');
-    
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const filter = this.getAttribute('data-filter');
-            
-            // Update active button
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Filter publications
-            publicationItems.forEach(item => {
-                const category = item.getAttribute('data-category');
-                
-                if (filter === 'all' || category === filter) {
-                    item.style.display = 'block';
-                    item.style.animation = 'fadeIn 0.5s ease forwards';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    });
-}
-
 // Stats counter animation
 function initStatsCounter() {
     const statNumbers = document.querySelectorAll('.stat-number');
@@ -502,51 +472,4 @@ document.addEventListener('DOMContentLoaded', function() {
         lazyImages.forEach(img => imageObserver.observe(img));
     }
 });
-
-// Timeline functionality
-function initTimeline() {
-    let currentStep = 0;
-    const totalSteps = 4;
-    
-    const navButtons = document.querySelectorAll('.timeline-nav-btn');
-    const contentItems = document.querySelectorAll('.timeline-content-item');
-    
-    // Initialize timeline
-    updateTimeline();
-    
-    // Navigation button clicks
-    navButtons.forEach((btn, index) => {
-        btn.addEventListener('click', () => {
-            currentStep = index;
-            updateTimeline();
-        });
-    });
-    
-    // Update timeline display
-    function updateTimeline() {
-        // Update navigation buttons
-        navButtons.forEach((btn, index) => {
-            btn.classList.toggle('active', index === currentStep);
-        });
-        
-        // Update content items
-        contentItems.forEach((item, index) => {
-            item.classList.toggle('active', index === currentStep);
-        });
-    }
-    
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft' && currentStep > 0) {
-            currentStep--;
-            updateTimeline();
-        } else if (e.key === 'ArrowRight' && currentStep < totalSteps - 1) {
-            currentStep++;
-            updateTimeline();
-        }
-    });
-    
-    console.log('Timeline initialized with', totalSteps, 'steps');
-}
-
 

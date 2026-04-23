@@ -89,47 +89,55 @@
         return div.innerHTML;
     }
 
+    function repoAcronym(name) {
+        if (!name) return 'Repo';
+        // First letters of segments (split on -/_), uppercase, max 6 chars
+        const parts = name.split(/[-_]/).filter(Boolean);
+        if (parts.length === 1) {
+            return parts[0].slice(0, 6).toUpperCase();
+        }
+        const acronym = parts.map((p) => p[0]).join('').toUpperCase();
+        return acronym.length >= 2 ? acronym.slice(0, 6) : parts[0].slice(0, 6).toUpperCase();
+    }
+
     function renderSlide(p, index, total) {
-        const pushed = p.pushedAt
-            ? new Date(p.pushedAt).toLocaleDateString(undefined, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-              })
+        const pushedDate = p.pushedAt ? new Date(p.pushedAt) : null;
+        const pushedFmt = pushedDate
+            ? pushedDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
             : '';
-
-        const topicsHtml =
-            p.topics.length > 0
-                ? `<ul class="research-tags github-project-tags">${p.topics
-                      .map((t) => `<li>${escapeHtml(t)}</li>`)
-                      .join('')}</ul>`
-                : '';
-
-        const langHtml = p.language
-            ? `<span class="github-project-lang">${escapeHtml(
-                  p.language
-              )}</span>`
-            : '';
+        const metaParts = [];
+        if (pushedFmt) metaParts.push(`Updated ${pushedFmt}`);
+        if (p.language) metaParts.push(p.language);
+        const meta = metaParts.join(' · ');
 
         const label = `Project ${index + 1} of ${total}: ${p.title}`;
 
         return `
 <article class="github-project-slide" role="group" aria-roledescription="slide" aria-label="${escapeHtml(label)}">
-    <div class="github-project-slide-inner">
-        <div class="research-card github-project-card">
-            <div class="research-icon github-project-icon">
-                <i class="fab fa-github-alt" aria-hidden="true"></i>
-            </div>
-            <h3>${escapeHtml(p.title)}</h3>
-            <p>${escapeHtml(p.description)}</p>
-            <div class="github-project-meta">
-                ${langHtml}
-                ${pushed ? `<span class="github-project-pushed">Updated ${escapeHtml(pushed)}</span>` : ''}
-            </div>
-            ${topicsHtml}
-            <div class="github-project-actions">
-                <a href="${escapeHtml(p.siteUrl)}" class="btn btn-primary github-project-btn" target="_blank" rel="noopener noreferrer">View site</a>
-                <a href="${escapeHtml(p.repoUrl)}" class="btn btn-secondary github-project-btn" target="_blank" rel="noopener noreferrer">Repository</a>
+    <div class="github-project-slide-figure">
+        <div class="github-project-slide-figure-placeholder">
+            <span class="github-project-slide-name-acronym">${escapeHtml(repoAcronym(p.name))}</span>
+            ${pushedDate ? `<span class="github-project-slide-figure-year">${pushedDate.getFullYear()}</span>` : ''}
+        </div>
+        <div class="github-project-slide-iframe-wrap">
+            <iframe class="github-project-slide-iframe" src="${escapeHtml(p.siteUrl)}" loading="lazy" title="${escapeHtml(p.title)} preview" aria-hidden="true"></iframe>
+        </div>
+    </div>
+    <div class="github-project-slide-content">
+        ${meta ? `<p class="github-project-slide-meta">${escapeHtml(meta)}</p>` : ''}
+        <h3 class="github-project-slide-title">${escapeHtml(p.title)}</h3>
+        <p class="github-project-slide-description">${escapeHtml(p.description)}</p>
+        <div class="github-project-slide-footer">
+            <span class="github-project-slide-repo-name">
+                <i class="fab fa-github" aria-hidden="true"></i> ${escapeHtml(p.name)}
+            </span>
+            <div class="github-project-slide-links">
+                <a href="${escapeHtml(p.siteUrl)}" class="pub-slide-link pub-slide-link-primary" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-external-link-alt" aria-hidden="true"></i> View site
+                </a>
+                <a href="${escapeHtml(p.repoUrl)}" class="pub-slide-link" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-github" aria-hidden="true"></i> Repository
+                </a>
             </div>
         </div>
     </div>

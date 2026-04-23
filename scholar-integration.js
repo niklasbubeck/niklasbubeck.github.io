@@ -26,7 +26,7 @@ class ScholarIntegration {
 
     // Fetch data from Semantic Scholar API
     async fetchFromSemanticScholar() {
-        const fields = 'name,affiliations,homepage,paperCount,citationCount,hIndex,papers.title,papers.authors,papers.venue,papers.year,papers.citationCount,papers.url,papers.openAccessPdf,papers.paperId';
+        const fields = 'name,affiliations,homepage,paperCount,citationCount,hIndex,papers.title,papers.authors,papers.venue,papers.year,papers.citationCount,papers.url,papers.openAccessPdf,papers.paperId,papers.corpusId,papers.externalIds';
         const url = `${this.apiUrl}/${this.semanticScholarId}?fields=${fields}`;
         
         console.log('Making API request to:', url);
@@ -64,9 +64,13 @@ class ScholarIntegration {
             year: paper.year,
             link: paper.openAccessPdf?.url || paper.url || '#',
             publicationUrl: paper.url || '#',
-            semanticScholarUrl: paper.paperId ? 
+            paperId: paper.paperId || null,
+            corpusId: paper.corpusId || null,
+            arxivId: paper.externalIds?.ArXiv || null,
+            semanticScholarUrl: paper.paperId ?
                 `https://www.semanticscholar.org/paper/${paper.paperId}` : '#',
-            tldr: null // Will be fetched asynchronously for each paper
+            tldr: null,
+            figureUrl: null
         }));
 
         return {
@@ -314,480 +318,274 @@ class ScholarIntegration {
         requestAnimationFrame(animateValue);
     }
 
-    // Update publications section
+    // Update publications section — render as slideshow
     async updatePublications(publications) {
-        const publicationsList = document.querySelector('.publications-list');
-        if (!publicationsList) {
-            console.error('Publications list element not found!');
+        const viewport = document.getElementById('publications-viewport');
+        if (!viewport) {
+            console.error('Publications viewport not found!');
             return;
         }
 
-        publicationsList.innerHTML = '';
-        console.log(`Displaying ${publications.length} publications from Semantic Scholar`);
-        
-        // First, display publications without TL;DR
-        publications.forEach(pub => {
-            pub.tldr = null; // Initialize as null
-            const element = this.createPublicationElement(pub);
-            publicationsList.appendChild(element);
+        // Sort newest first by default
+        const sorted = [...publications].sort((a, b) => (b.year || 0) - (a.year || 0));
+
+        viewport.innerHTML = '';
+        sorted.forEach((pub, i) => {
+            viewport.appendChild(this.createPublicationSlide(pub, i, sorted.length));
         });
-        
-        // Force refresh to ensure elements are visible
-        setTimeout(() => {
-            const items = publicationsList.querySelectorAll('.publication-item');
-            items.forEach(item => {
-                item.classList.add('visible');
-            });
-            
-            // Reinitialize publication filters after publications are loaded
-            this.initPublicationFilters();
-        }, 100);
-        
-        // Then, fetch TL;DR data in parallel and update publications
-        this.loadTldrDataForPublications(publications);
+
+        this.initPublicationsCarousel(sorted.length);
+
+        // Lazy-load TL;DRs + figures
+        this.loadSlideDetails(sorted);
     }
 
-    // Load TL;DR and abstract data for publications asynchronously
-    async loadTldrDataForPublications(publications) {
-        console.log('Loading TL;DR and abstract data for publications...');
-        
-        const detailPromises = publications.map(async (pub, index) => {
-            if (pub.semanticScholarUrl && pub.semanticScholarUrl !== '#') {
-                const paperId = this.extractPaperIdFromUrl(pub.semanticScholarUrl);
-                if (paperId) {
-                    try {
-                        const details = await this.fetchPaperDetails(paperId);
-                        if (details.tldr || details.abstract) {
-                            pub.tldr = details.tldr;
-                            pub.abstract = details.abstract;
-                            // Update the existing publication element with details
-                            this.updatePublicationElementWithDetails(index, details);
-                        }
-                    } catch (error) {
-                        console.log(`Could not fetch details for paper ${paperId}:`, error.message);
-                    }
-                }
-            }
-        });
-        
-        // Wait for all detail requests to complete (or fail)
-        await Promise.all(detailPromises);
-        console.log('TL;DR and abstract loading completed');
-    }
+    // Build a single slide
+    createPublicationSlide(pub, index, total) {
+        const slide = document.createElement('article');
+        slide.className = 'publication-slide';
+        slide.setAttribute('data-index', String(index));
+        slide.setAttribute('aria-roledescription', 'slide');
+        slide.setAttribute('aria-label', `Publication ${index + 1} of ${total}`);
 
-    // Update a specific publication element with TL;DR and abstract data
-    updatePublicationElementWithDetails(publicationIndex, details) {
-        const publicationItems = document.querySelectorAll('.publication-item');
-        const targetItem = publicationItems[publicationIndex];
-        
-        if (targetItem && (details.tldr || details.abstract)) {
-            // Check if details section already exists
-            let detailsSection = targetItem.querySelector('.paper-details-section');
-            if (!detailsSection) {
-                // Create and insert details section
-                detailsSection = document.createElement('div');
-                detailsSection.className = 'paper-details-section';
-                
-                let buttonsHtml = '';
-                let contentHtml = '';
-                
-                // Add TL;DR if available
-                if (details.tldr) {
-                    buttonsHtml += `
-                        <button class="detail-toggle-btn tldr-btn" onclick="this.closest('.publication-item').querySelector('.tldr-content').classList.toggle('show'); this.textContent = this.textContent.includes('Show') ? 'Hide TL;DR' : 'Show TL;DR';">
-                            <i class="fas fa-lightbulb"></i> Show TL;DR
-                        </button>
-                    `;
-                    contentHtml += `
-                        <div class="tldr-content detail-content">
-                            <div class="detail-text">
-                                <strong>TL;DR:</strong> ${details.tldr}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                // Add Abstract if available
-                if (details.abstract) {
-                    buttonsHtml += `
-                        <button class="detail-toggle-btn abstract-btn" onclick="this.closest('.publication-item').querySelector('.abstract-content').classList.toggle('show'); this.textContent = this.textContent.includes('Show') ? 'Hide Abstract' : 'Show Abstract';">
-                            <i class="fas fa-file-text"></i> Show Abstract
-                        </button>
-                    `;
-                    contentHtml += `
-                        <div class="abstract-content detail-content">
-                            <div class="detail-text">
-                                <strong>Abstract:</strong> ${details.abstract}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                detailsSection.innerHTML = `
-                    <div class="detail-buttons">
-                        ${buttonsHtml}
-                    </div>
-                    ${contentHtml}
-                `;
-                
-                // Insert the detail buttons into the existing publication-links section
-                const linksSection = targetItem.querySelector('.publication-links');
-                if (linksSection) {
-                    // Add detail buttons to the links section
-                    const detailButtons = detailsSection.querySelector('.detail-buttons');
-                    linksSection.appendChild(detailButtons);
-                    
-                    // Insert content sections before the links section
-                    const contentElements = detailsSection.querySelectorAll('.detail-content');
-                    contentElements.forEach(content => {
-                        linksSection.parentNode.insertBefore(content, linksSection);
-                    });
-                }
-            }
-        }
-    }
+        const venueLine = pub.publication && pub.publication !== 'Unknown Venue'
+            ? `${this.escapeHtml(pub.publication)}${pub.year ? ` · ${pub.year}` : ''}`
+            : (pub.year ? String(pub.year) : '');
 
-    // Initialize publication filters for dynamically loaded content
-    initPublicationFilters() {
-        console.log('Initializing advanced publication filters...');
-        
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const sortDropdown = document.getElementById('sort-select');
-        const searchInput = document.getElementById('search-publications');
-        const clearButton = document.getElementById('clear-search');
-        const resultsCount = document.getElementById('results-count');
-        
-        // Debug: Check if elements exist
-        console.log('Found elements:');
-        console.log('- Filter buttons:', filterButtons.length);
-        console.log('- Sort dropdown:', sortDropdown);
-        console.log('- Search input:', searchInput);
-        console.log('- Clear button:', clearButton);
-        console.log('- Results count:', resultsCount);
-        
-        // Initialize publications array for sorting/filtering
-        this.allPublications = [];
-        this.filteredPublications = [];
-        this.currentFilter = 'all';
-        this.currentSort = 'newest';
-        this.currentSearch = '';
-        
-        // Pagination settings
-        this.itemsPerPage = 3;
-        this.currentPage = 1;
-        this.totalPages = 1;
-        
-        // Store original publications data
-        const publicationItems = document.querySelectorAll('.publication-item');
-        publicationItems.forEach(item => {
-            const yearElement = item.querySelector('.publication-year');
-            const citationsElement = item.querySelector('.publication-citations');
-            // Try multiple selectors for title (publications use h4 tags)
-            const titleElement = item.querySelector('h4') || item.querySelector('h3') || item.querySelector('.publication-title');
-            const authorsElement = item.querySelector('.publication-authors');
-            const venueElement = item.querySelector('.publication-venue');
-            
-            // Debug: Log what we find for each publication
-            console.log('Processing publication item:', item);
-            console.log('  Title element found:', titleElement);
-            console.log('  Title text:', titleElement ? titleElement.textContent.trim() : 'NOT FOUND');
-            console.log('  Authors element:', authorsElement);
-            console.log('  Venue element:', venueElement);
-            
-            const pubData = {
-                element: item,
-                title: titleElement ? titleElement.textContent.trim() : '',
-                year: yearElement ? parseInt(yearElement.textContent) || 0 : 0,
-                citations: citationsElement ? parseInt(citationsElement.textContent.replace(/\D/g, '')) || 0 : 0,
-                category: item.getAttribute('data-category') || 'journal',
-                authors: authorsElement ? authorsElement.textContent.trim() : '',
-                venue: venueElement ? venueElement.textContent.trim() : ''
-            };
-            
-            console.log('  Final pubData:', pubData);
-            this.allPublications.push(pubData);
-        });
-        
-        // Remove existing event listeners by cloning buttons
-        filterButtons.forEach(button => {
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-        });
-        
-        // Type filter buttons
-        const newFilterButtons = document.querySelectorAll('.filter-btn');
-        newFilterButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                newFilterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                this.currentFilter = button.getAttribute('data-filter');
-                this.applyFiltersAndSort();
-            });
-        });
-        
-        // Sort dropdown
-        if (sortDropdown) {
-            sortDropdown.addEventListener('change', (e) => {
-                this.currentSort = e.target.value;
-                this.applyFiltersAndSort();
-            });
+        const venueAcronym = this.venueAcronym(pub.publication);
+        const links = [];
+        if (pub.link && pub.link !== '#') {
+            links.push(`<a href="${this.escapeAttr(pub.link)}" class="pub-slide-link pub-slide-link-primary" target="_blank" rel="noopener">
+                <i class="fas fa-file-pdf" aria-hidden="true"></i> PDF
+            </a>`);
         }
-        
-        // Search input
-        if (searchInput) {
-            console.log('Setting up search input listener...');
-            searchInput.addEventListener('input', (e) => {
-                this.currentSearch = e.target.value.toLowerCase();
-                console.log('Search query:', this.currentSearch);
-                this.applyFiltersAndSort();
-            });
-        } else {
-            console.error('Search input element not found!');
+        if (pub.semanticScholarUrl && pub.semanticScholarUrl !== '#') {
+            links.push(`<a href="${this.escapeAttr(pub.semanticScholarUrl)}" class="pub-slide-link" target="_blank" rel="noopener">
+                <i class="fas fa-external-link-alt" aria-hidden="true"></i> Semantic Scholar
+            </a>`);
         }
-        
-        // Clear search button
-        if (clearButton) {
-            clearButton.addEventListener('click', () => {
-                if (searchInput) {
-                    searchInput.value = '';
-                    this.currentSearch = '';
-                    this.applyFiltersAndSort();
-                }
-            });
-        }
-        
-        // Pagination controls
-        const prevButton = document.getElementById('prev-page');
-        const nextButton = document.getElementById('next-page');
-        
-        if (prevButton) {
-            prevButton.addEventListener('click', () => {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.updatePublicationDisplay();
-                    this.updatePaginationControls();
-                }
-            });
-        }
-        
-        if (nextButton) {
-            nextButton.addEventListener('click', () => {
-                if (this.currentPage < this.totalPages) {
-                    this.currentPage++;
-                    this.updatePublicationDisplay();
-                    this.updatePaginationControls();
-                }
-            });
-        }
-        
-        // Initial filter and count
-        this.applyFiltersAndSort();
-        
-        console.log('Advanced publication filters initialized successfully');
-    }
-    
-    applyFiltersAndSort() {
-        // Start with all publications
-        this.filteredPublications = [...this.allPublications];
-        
-        // Apply type filter
-        if (this.currentFilter !== 'all') {
-            this.filteredPublications = this.filteredPublications.filter(pub => 
-                pub.category === this.currentFilter
-            );
-        }
-        
-        // Apply search filter
-        if (this.currentSearch) {
-            console.log('Applying search filter for:', this.currentSearch);
-            console.log('Before search filter:', this.filteredPublications.length, 'publications');
-            
-            this.filteredPublications = this.filteredPublications.filter(pub => {
-                // Debug: Show what we're searching through
-                console.log('Searching in publication:');
-                console.log('  Title:', `"${pub.title}"`);
-                console.log('  Authors:', `"${pub.authors}"`);
-                console.log('  Venue:', `"${pub.venue}"`);
-                
-                const titleMatch = pub.title.toLowerCase().includes(this.currentSearch);
-                const authorsMatch = pub.authors.toLowerCase().includes(this.currentSearch);
-                const venueMatch = pub.venue.toLowerCase().includes(this.currentSearch);
-                const matches = titleMatch || authorsMatch || venueMatch;
-                
-                console.log('  Matches - Title:', titleMatch, 'Authors:', authorsMatch, 'Venue:', venueMatch);
-                
-                if (matches) {
-                    console.log('✅ Match found in:', pub.title);
-                }
-                
-                return matches;
-            });
-            
-            console.log('After search filter:', this.filteredPublications.length, 'publications');
-        }
-        
-        // Apply sorting
-        this.filteredPublications.sort((a, b) => {
-            switch (this.currentSort) {
-                case 'newest':
-                    return b.year - a.year;
-                case 'oldest':
-                    return a.year - b.year;
-                case 'citations-desc':
-                    return b.citations - a.citations;
-                case 'citations-asc':
-                    return a.citations - b.citations;
-                case 'title-asc':
-                    return a.title.localeCompare(b.title);
-                case 'title-desc':
-                    return b.title.localeCompare(a.title);
-                default:
-                    return b.year - a.year;
-            }
-        });
-        
-        // Reset to first page when filters change
-        this.currentPage = 1;
-        this.totalPages = Math.ceil(this.filteredPublications.length / this.itemsPerPage);
-        
-        // Update display
-        this.updatePublicationDisplay();
-        this.updateResultsCount();
-        this.updatePaginationControls();
-    }
-    
-    updatePublicationDisplay() {
-        const publicationsContainer = document.querySelector('.publications-list');
-        if (!publicationsContainer) return;
-        
-        // Hide all publications first
-        this.allPublications.forEach(pub => {
-            pub.element.style.display = 'none';
-            pub.element.classList.remove('visible');
-        });
-        
-        // Calculate pagination
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        const pagePublications = this.filteredPublications.slice(startIndex, endIndex);
-        
-        console.log(`Displaying page ${this.currentPage}: items ${startIndex + 1}-${Math.min(endIndex, this.filteredPublications.length)} of ${this.filteredPublications.length}`);
-        
-        // Clear container and re-add current page publications
-        publicationsContainer.innerHTML = '';
-        
-        pagePublications.forEach((pub, index) => {
-            pub.element.style.display = 'block';
-            pub.element.classList.add('visible');
-            pub.element.style.opacity = '0';
-            pub.element.style.transform = 'translateY(20px)';
-            publicationsContainer.appendChild(pub.element);
-            
-            // Add staggered animation
-            setTimeout(() => {
-                pub.element.style.opacity = '1';
-                pub.element.style.transform = 'translateY(0)';
-                pub.element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            }, index * 100);
-        });
-        
-        // Scroll to top of publications container
-        const container = document.querySelector('.publications-container');
-        if (container) {
-            container.scrollTop = 0;
-        }
-    }
-    
-    updateResultsCount() {
-        const resultsCount = document.getElementById('results-count');
-        if (resultsCount) {
-            const count = this.filteredPublications.length;
-            const total = this.allPublications.length;
-            
-            if (this.currentFilter === 'all' && !this.currentSearch) {
-                resultsCount.textContent = `${count} publications`;
-            } else {
-                resultsCount.textContent = `${count} of ${total} publications`;
-            }
-        }
-    }
-    
-    updatePaginationControls() {
-        const prevButton = document.getElementById('prev-page');
-        const nextButton = document.getElementById('next-page');
-        const currentPageSpan = document.getElementById('current-page');
-        const totalPagesSpan = document.getElementById('total-pages');
-        
-        // Update page numbers
-        if (currentPageSpan) {
-            currentPageSpan.textContent = this.currentPage;
-        }
-        if (totalPagesSpan) {
-            totalPagesSpan.textContent = this.totalPages;
-        }
-        
-        // Update button states
-        if (prevButton) {
-            prevButton.disabled = this.currentPage <= 1;
-        }
-        if (nextButton) {
-            nextButton.disabled = this.currentPage >= this.totalPages;
-        }
-        
-        // Hide pagination if only one page
-        const paginationControls = document.querySelector('.pagination-controls');
-        if (paginationControls) {
-            paginationControls.style.display = this.totalPages <= 1 ? 'none' : 'flex';
-        }
-        
-        console.log(`Pagination: Page ${this.currentPage} of ${this.totalPages}`);
-    }
 
-    // Create publication element
-    createPublicationElement(publication) {
-        console.log('Creating element for publication:', publication.title);
-        
-        const pubDiv = document.createElement('div');
-        pubDiv.className = 'publication-item fade-in visible'; // Add 'visible' class immediately
-        pubDiv.setAttribute('data-category', this.categorizePublication(publication.publication));
-        pubDiv.style.display = 'block'; // Ensure it's visible
-
-        pubDiv.innerHTML = `
-            <div class="publication-content">
-                <h4>${publication.title || 'Untitled'}</h4>
-                <p class="publication-authors">${this.highlightAuthorName(publication.authors || 'Unknown authors')}</p>
-                <p class="publication-venue">${publication.publication || 'Unknown venue'}${publication.year ? `, ${publication.year}` : ''}</p>
-                <p class="publication-citations">
-                    <i class="fas fa-quote-left"></i> 
-                    Cited by ${publication.citedBy || 0} 
-                    ${publication.year ? `• ${new Date().getFullYear() - publication.year} years ago` : ''}
+        slide.innerHTML = `
+            <div class="publication-slide-figure" data-slide-figure>
+                <div class="publication-slide-figure-placeholder">
+                    <span class="publication-slide-venue-acronym">${this.escapeHtml(venueAcronym)}</span>
+                    ${pub.year ? `<span class="publication-slide-figure-year">${pub.year}</span>` : ''}
+                </div>
+            </div>
+            <div class="publication-slide-content">
+                <p class="publication-slide-meta">${this.escapeHtml(venueLine)}</p>
+                <h3 class="publication-slide-title">${this.escapeHtml(pub.title || 'Untitled')}</h3>
+                <p class="publication-slide-authors">${this.highlightAuthorName(pub.authors || '')}</p>
+                <p class="publication-slide-tldr" data-slide-tldr>
+                    <span class="publication-slide-tldr-loading">Loading summary…</span>
                 </p>
-                ${publication.tldr ? `
-                    <div class="tldr-section">
-                        <button class="tldr-toggle-btn" onclick="this.closest('.publication-item').querySelector('.tldr-content').classList.toggle('show'); this.textContent = this.textContent.includes('Show') ? 'Hide TL;DR' : 'Show TL;DR';">
-                            <i class="fas fa-lightbulb"></i> Show TL;DR
-                        </button>
-                        <div class="tldr-content">
-                            <div class="tldr-text">
-                                <strong>TL;DR:</strong> ${publication.tldr}
-                            </div>
-                        </div>
-                    </div>
-                ` : ''}
-                <div class="publication-links">
-                    ${publication.link !== '#' ? `<a href="${publication.link}" class="pub-link pdf-link" target="_blank">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </a>` : ''}
+                <div class="publication-slide-footer">
+                    <span class="publication-slide-citations">
+                        <i class="fas fa-quote-left" aria-hidden="true"></i> ${pub.citedBy || 0} citation${(pub.citedBy || 0) === 1 ? '' : 's'}
+                    </span>
+                    <div class="publication-slide-links">${links.join('')}</div>
                 </div>
             </div>
         `;
-
-        console.log('Created publication element:', pubDiv);
-        return pubDiv;
+        return slide;
     }
+
+    // Carousel behaviour (mirrors github-projects.js pattern)
+    initPublicationsCarousel(total) {
+        const carousel = document.getElementById('publications-carousel');
+        if (!carousel) return;
+        const viewport = carousel.querySelector('.publications-viewport');
+        const prev = carousel.querySelector('.publications-carousel-prev');
+        const next = carousel.querySelector('.publications-carousel-next');
+        const dotsContainer = carousel.querySelector('.publications-carousel-dots');
+        const counter = carousel.querySelector('.publications-carousel-counter');
+        if (!viewport || !prev || !next) return;
+
+        if (total <= 1) {
+            carousel.classList.add('publications-carousel-single');
+        } else {
+            carousel.classList.remove('publications-carousel-single');
+        }
+
+        const slideWidth = () => viewport.clientWidth || 1;
+        const currentIndex = () => Math.min(
+            total - 1,
+            Math.max(0, Math.round(viewport.scrollLeft / slideWidth()))
+        );
+        const goTo = (i) => {
+            const clamped = Math.max(0, Math.min(total - 1, i));
+            viewport.scrollTo({ left: clamped * slideWidth(), behavior: 'smooth' });
+        };
+        const updateUI = () => {
+            const i = currentIndex();
+            prev.disabled = i <= 0;
+            next.disabled = i >= total - 1;
+            if (counter) counter.textContent = `${i + 1} / ${total}`;
+            dotsContainer.querySelectorAll('.publications-carousel-dot').forEach((btn, idx) => {
+                const active = idx === i;
+                btn.classList.toggle('publications-carousel-dot-active', active);
+                btn.setAttribute('aria-current', active ? 'true' : 'false');
+            });
+        };
+
+        dotsContainer.innerHTML = total
+            ? Array.from({ length: total }, (_, i) =>
+                `<button type="button" class="publications-carousel-dot" aria-label="Go to publication ${i + 1}" aria-current="${i === 0 ? 'true' : 'false'}"></button>`
+            ).join('')
+            : '';
+        dotsContainer.querySelectorAll('.publications-carousel-dot').forEach((btn, i) => {
+            btn.addEventListener('click', () => goTo(i));
+        });
+
+        // Replace listeners on prev/next so we don't stack them on re-render
+        const newPrev = prev.cloneNode(true);
+        const newNext = next.cloneNode(true);
+        prev.parentNode.replaceChild(newPrev, prev);
+        next.parentNode.replaceChild(newNext, next);
+        newPrev.addEventListener('click', () => goTo(currentIndex() - 1));
+        newNext.addEventListener('click', () => goTo(currentIndex() + 1));
+
+        let scrollEndTimer;
+        viewport.addEventListener('scroll', () => {
+            clearTimeout(scrollEndTimer);
+            scrollEndTimer = setTimeout(updateUI, 80);
+        });
+        if ('onscrollend' in window) {
+            viewport.addEventListener('scrollend', updateUI);
+        }
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                const i = currentIndex();
+                viewport.scrollTo({ left: i * slideWidth(), behavior: 'auto' });
+                updateUI();
+            }, 100);
+        });
+
+        carousel.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goTo(currentIndex() - 1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                goTo(currentIndex() + 1);
+            }
+        });
+
+        updateUI();
+    }
+
+    // Fetch TL;DR + figure for each slide. Two independent queues so that
+    // a slow PDF render doesn't block the next S2 call (and vice versa).
+    //   - S2 queue: serialized with >=1.1s spacing (unauth rate limit is ~1/s)
+    //   - PDF queue: serialized so we don't slam the free CORS proxies
+    async loadSlideDetails(publications) {
+        const slides = document.querySelectorAll('.publication-slide');
+
+        const s2Queue = (async () => {
+            for (let i = 0; i < publications.length; i++) {
+                const pub = publications[i];
+                const slide = slides[i];
+                if (!slide || !pub.paperId) continue;
+                if (i > 0) await this._sleep(1100);
+                await this._loadSlideTldr(pub, slide).catch(() => {});
+            }
+        })();
+
+        const pdfQueue = (async () => {
+            for (let i = 0; i < publications.length; i++) {
+                const pub = publications[i];
+                const slide = slides[i];
+                if (!slide) continue;
+                await this.renderPdfThumbnail(pub, slide).catch(() => {});
+            }
+        })();
+
+        await Promise.all([s2Queue, pdfQueue]);
+    }
+
+    async _loadSlideTldr(pub, slide) {
+        const tldrEl = slide.querySelector('[data-slide-tldr]');
+        if (!tldrEl) return;
+        try {
+            const details = await this.fetchPaperDetails(pub.paperId);
+            if (details.tldr) {
+                tldrEl.textContent = details.tldr;
+            } else if (details.abstract) {
+                const trimmed = details.abstract.length > 360
+                    ? details.abstract.slice(0, 357).trimEnd() + '…'
+                    : details.abstract;
+                tldrEl.textContent = trimmed;
+            } else {
+                tldrEl.textContent = '';
+                tldrEl.classList.add('publication-slide-tldr-empty');
+            }
+        } catch (e) {
+            tldrEl.textContent = '';
+        }
+    }
+
+    _sleep(ms) {
+        return ms > 0 ? new Promise(r => setTimeout(r, ms)) : Promise.resolve();
+    }
+
+    // Resolve the best PDF URL for a publication.
+    pdfUrlFor(pub) {
+        if (pub.link && pub.link !== '#' && /\.pdf($|\?)|\/pdf\//i.test(pub.link)) {
+            return pub.link;
+        }
+        // arXiv: convert abs URL or arxiv id to direct PDF
+        if (pub.arxivId) {
+            return `https://arxiv.org/pdf/${pub.arxivId}.pdf`;
+        }
+        if (pub.link && /arxiv\.org\/abs\//i.test(pub.link)) {
+            return pub.link.replace('/abs/', '/pdf/') + (pub.link.endsWith('.pdf') ? '' : '.pdf');
+        }
+        return null;
+    }
+
+    // Show the first page of the PDF using a native browser iframe.
+    // Browsers fetch PDF iframes themselves (not JS) so no CORS is involved.
+    // URL fragment hints (#view=FitH&toolbar=0) ask the built-in viewer to
+    // show page 1 fitted to width with no toolbar.
+    async renderPdfThumbnail(pub, slide) {
+        const pdfUrl = this.pdfUrlFor(pub);
+        if (!pdfUrl) return;
+        const figEl = slide.querySelector('[data-slide-figure]');
+        if (!figEl) return;
+
+        const iframe = document.createElement('iframe');
+        iframe.src = `${pdfUrl}#view=FitH&toolbar=0&navpanes=0&scrollbar=0&page=1`;
+        iframe.className = 'publication-slide-figure-pdf';
+        iframe.loading = 'lazy';
+        iframe.title = pub.title || 'Paper preview';
+        iframe.setAttribute('aria-hidden', 'true');
+
+        // Replace placeholder once iframe says it's loaded. If it never
+        // fires (rare — e.g. blocked download), we leave the placeholder.
+        const wrap = document.createElement('div');
+        wrap.className = 'publication-slide-figure-pdf-wrap';
+        wrap.appendChild(iframe);
+        figEl.appendChild(wrap);
+    }
+
+    venueAcronym(venue) {
+        if (!venue || venue === 'Unknown Venue') return 'Paper';
+        const trimmed = venue.trim();
+        if (trimmed.length <= 8) return trimmed.toUpperCase();
+        const acronym = trimmed.split(/\s+/).map(w => w[0]).join('').toUpperCase();
+        return acronym.length >= 2 ? acronym.slice(0, 6) : trimmed.slice(0, 6).toUpperCase();
+    }
+
+    escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+    escapeAttr(s) { return this.escapeHtml(s); }
 
     // Highlight author name in publication
     highlightAuthorName(authors) {
@@ -800,30 +598,6 @@ class ScholarIntegration {
         });
 
         return highlightedAuthors;
-    }
-
-    // Categorize publication for filtering
-    categorizePublication(venue) {
-        const lowerVenue = venue.toLowerCase();
-        console.log(`Categorizing venue: "${venue}" -> "${lowerVenue}"`);
-        
-        let category;
-        if (lowerVenue.includes('conference') || lowerVenue.includes('proceedings') || 
-            lowerVenue.includes('workshop') || lowerVenue.includes('symposium') ||
-            lowerVenue.includes('cvpr') || lowerVenue.includes('iclr') || lowerVenue.includes('neurips') ||
-            lowerVenue.includes('icml') || lowerVenue.includes('iccv') || lowerVenue.includes('eccv')) {
-            category = 'conference';
-        } else if (lowerVenue.includes('arxiv') || lowerVenue.includes('preprint') || 
-                   lowerVenue.includes('biorxiv') || lowerVenue.includes('medrxiv') ||
-                   lowerVenue === 'arxiv.org') {
-            category = 'preprint';
-        } else {
-            // Default to journal for unknown venues, journals, and published papers
-            category = 'journal';
-        }
-        
-        console.log(`"${venue}" categorized as: ${category}`);
-        return category;
     }
 
     // Update coauthors section
@@ -883,15 +657,15 @@ function initializeScholar() {
         return;
     }
     
-    // Check if publications list exists
-    const publicationsList = document.querySelector('.publications-list');
-    if (!publicationsList) {
-        console.error('Publications list element not found! Retrying in 1 second...');
+    // Check if publications viewport exists
+    const publicationsViewport = document.querySelector('.publications-viewport');
+    if (!publicationsViewport) {
+        console.error('Publications viewport not found! Retrying in 1 second...');
         setTimeout(initializeScholar, 1000);
         return;
     }
-    
-    console.log('Publications list found, starting integration...');
+
+    console.log('Publications viewport found, starting integration...');
     const scholarIntegration = new ScholarIntegration('2372230806');
     scholarIntegration.setupAutoUpdate();
     window.scholarIntegration = scholarIntegration;
@@ -921,80 +695,6 @@ window.testScholarAPI = async function() {
         console.error('Manual test failed:', error);
     }
 };
-
-// Debug function to check DOM elements
-window.debugDOM = function() {
-    console.log('=== DOM DEBUG ===');
-    const publicationsList = document.querySelector('.publications-list');
-    console.log('Publications list element:', publicationsList);
-    console.log('Publications list innerHTML:', publicationsList?.innerHTML);
-    console.log('Publications section:', document.querySelector('#publications'));
-    const items = document.querySelectorAll('.publication-item');
-    console.log('All .publication-item elements:', items);
-    
-    // Check visibility of each publication
-    items.forEach((item, index) => {
-        const computedStyle = window.getComputedStyle(item);
-        console.log(`Publication ${index + 1}:`, {
-            element: item,
-            classes: item.className,
-            opacity: computedStyle.opacity,
-            display: computedStyle.display,
-            visibility: computedStyle.visibility
-        });
-    });
-};
-
-// Quick fix function
-window.fixPublications = function() {
-    console.log('=== FIXING PUBLICATIONS VISIBILITY ===');
-    const items = document.querySelectorAll('.publication-item');
-    items.forEach((item, index) => {
-        item.classList.add('visible');
-        item.style.opacity = '1';
-        item.style.display = 'block';
-        console.log(`Fixed publication ${index + 1}:`, item.querySelector('h4')?.textContent);
-    });
-};
-
-// Test filtering function
-window.testFiltering = function() {
-    console.log('=== TESTING PUBLICATION FILTERING ===');
-    const items = document.querySelectorAll('.publication-item');
-    
-    items.forEach((item, index) => {
-        const title = item.querySelector('h3')?.textContent || item.querySelector('h4')?.textContent;
-        const category = item.getAttribute('data-category');
-        console.log(`Publication ${index + 1}: "${title}" -> Category: ${category}`);
-    });
-    
-    // Test filter buttons
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    console.log('Filter buttons:', filterButtons);
-    
-    filterButtons.forEach(btn => {
-        console.log(`Filter button: ${btn.textContent} (data-filter: ${btn.getAttribute('data-filter')})`);
-    });
-    
-    // Test search elements
-    console.log('Search input:', document.getElementById('search-publications'));
-    console.log('Sort dropdown:', document.getElementById('sort-select'));
-    console.log('Clear button:', document.getElementById('clear-search'));
-};
-
-// Test search function
-window.testSearch = function(query) {
-    console.log('=== TESTING SEARCH FUNCTION ===');
-    const searchInput = document.getElementById('search-publications');
-    if (searchInput) {
-        searchInput.value = query;
-        searchInput.dispatchEvent(new Event('input'));
-        console.log('Search triggered for:', query);
-    } else {
-        console.error('Search input not found!');
-    }
-};
-
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
