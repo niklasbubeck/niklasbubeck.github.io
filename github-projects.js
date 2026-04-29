@@ -5,7 +5,7 @@
 (function () {
     const GITHUB_USER = 'niklasbubeck';
     const EXCLUDE_REPOS = new Set(['niklasbubeck.github.io']);
-    const CACHE_KEY = 'github_pages_projects_v1';
+    const CACHE_KEY = 'github_pages_projects_v2';
     const CACHE_MS = 60 * 60 * 1000;
 
     function getCache() {
@@ -65,7 +65,6 @@
 
     function buildProjects(repos) {
         return repos
-            .filter((r) => r.fork === false)
             .filter((r) => r.has_pages === true)
             .filter((r) => !EXCLUDE_REPOS.has(r.name))
             .map((r) => ({
