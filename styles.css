@@ -1585,6 +1585,51 @@ section {
     border-left: 2px solid var(--border-color);
 }
 
+.github-project-slide-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    margin: 0.25rem 0 0;
+}
+
+.github-project-slide-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    line-height: 1;
+}
+
+.github-project-slide-stat i {
+    font-size: 0.95rem;
+    color: var(--accent-secondary);
+}
+
+.github-project-slide-stat-value {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.github-project-slide-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+}
+
+.github-project-slide-topic {
+    font-size: 0.78rem;
+    line-height: 1;
+    padding: 0.32rem 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    color: var(--text-muted);
+    background: transparent;
+    letter-spacing: 0.01em;
+}
+
 .github-project-slide-footer {
     display: flex;
     justify-content: space-between;
@@ -3359,6 +3404,23 @@ body.dark-mode .github-projects-viewport {
     background: var(--card-bg) !important;
     border-color: var(--border-color) !important;
     box-shadow: 0 4px 24px var(--shadow-color) !important;
+}
+
+body.dark-mode .github-project-slide-stat,
+body.dark-mode .github-project-slide-topic {
+    color: var(--text-muted) !important;
+}
+
+body.dark-mode .github-project-slide-stat i {
+    color: var(--accent-secondary) !important;
+}
+
+body.dark-mode .github-project-slide-stat-value {
+    color: var(--text-color) !important;
+}
+
+body.dark-mode .github-project-slide-topic {
+    border-color: var(--border-color) !important;
 }
 
 body.dark-mode .github-carousel-btn {

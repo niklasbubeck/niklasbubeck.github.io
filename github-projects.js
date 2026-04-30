@@ -5,7 +5,7 @@
 (function () {
     const GITHUB_USER = 'niklasbubeck';
     const EXCLUDE_REPOS = new Set(['niklasbubeck.github.io']);
-    const CACHE_KEY = 'github_pages_projects_v2';
+    const CACHE_KEY = 'github_pages_projects_v3';
     const CACHE_MS = 60 * 60 * 1000;
 
     function getCache() {
@@ -78,6 +78,13 @@
                 language: r.language,
                 topics: Array.isArray(r.topics) ? r.topics.slice(0, 5) : [],
                 pushedAt: r.pushed_at,
+                stars: r.stargazers_count || 0,
+                forks: r.forks_count || 0,
+                watchers: r.watchers_count || 0,
+                openIssues: r.open_issues_count || 0,
+                license: r.license && r.license.spdx_id && r.license.spdx_id !== 'NOASSERTION'
+                    ? r.license.spdx_id
+                    : null,
             }))
             .sort((a, b) => new Date(b.pushedAt) - new Date(a.pushedAt));
     }
@@ -99,6 +106,42 @@
         return acronym.length >= 2 ? acronym.slice(0, 6) : parts[0].slice(0, 6).toUpperCase();
     }
 
+    function formatCount(n) {
+        if (!Number.isFinite(n)) return '0';
+        if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'k';
+        return String(n);
+    }
+
+    function renderStats(p) {
+        const stats = [
+            { icon: 'fas fa-star', label: 'Stars', value: p.stars },
+            { icon: 'fas fa-code-branch', label: 'Forks', value: p.forks },
+            { icon: 'fas fa-eye', label: 'Watchers', value: p.watchers },
+            { icon: 'fas fa-circle-exclamation', label: 'Open issues', value: p.openIssues },
+        ];
+        const items = stats
+            .map(
+                (s) => `
+                <span class="github-project-slide-stat" title="${escapeHtml(s.label)}" aria-label="${escapeHtml(s.label)}: ${escapeHtml(String(s.value))}">
+                    <i class="${s.icon}" aria-hidden="true"></i>
+                    <span class="github-project-slide-stat-value">${escapeHtml(formatCount(s.value))}</span>
+                </span>`
+            )
+            .join('');
+        return `<div class="github-project-slide-stats" role="list">${items}</div>`;
+    }
+
+    function renderTopics(p) {
+        if (!p.topics || p.topics.length === 0) return '';
+        const chips = p.topics
+            .map(
+                (t) =>
+                    `<span class="github-project-slide-topic">${escapeHtml(t)}</span>`
+            )
+            .join('');
+        return `<div class="github-project-slide-topics" aria-label="Topics">${chips}</div>`;
+    }
+
     function renderSlide(p, index, total) {
         const pushedDate = p.pushedAt ? new Date(p.pushedAt) : null;
         const pushedFmt = pushedDate
@@ -107,6 +150,7 @@
         const metaParts = [];
         if (pushedFmt) metaParts.push(`Updated ${pushedFmt}`);
         if (p.language) metaParts.push(p.language);
+        if (p.license) metaParts.push(p.license);
         const meta = metaParts.join(' · ');
 
         const label = `Project ${index + 1} of ${total}: ${p.title}`;
@@ -126,6 +170,8 @@
         ${meta ? `<p class="github-project-slide-meta">${escapeHtml(meta)}</p>` : ''}
         <h3 class="github-project-slide-title">${escapeHtml(p.title)}</h3>
         <p class="github-project-slide-description">${escapeHtml(p.description)}</p>
+        ${renderStats(p)}
+        ${renderTopics(p)}
         <div class="github-project-slide-footer">
             <span class="github-project-slide-repo-name">
                 <i class="fab fa-github" aria-hidden="true"></i> ${escapeHtml(p.name)}
