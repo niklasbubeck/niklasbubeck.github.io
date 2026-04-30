@@ -5,7 +5,7 @@
 (function () {
     const GITHUB_USER = 'niklasbubeck';
     const EXCLUDE_REPOS = new Set(['niklasbubeck.github.io']);
-    const CACHE_KEY = 'github_pages_projects_v3';
+    const CACHE_KEY = 'github_pages_projects_v4';
     const CACHE_MS = 60 * 60 * 1000;
 
     function getCache() {
@@ -86,7 +86,11 @@
                     ? r.license.spdx_id
                     : null,
             }))
-            .sort((a, b) => new Date(b.pushedAt) - new Date(a.pushedAt));
+            .sort((a, b) => {
+                const sd = (b.stars || 0) - (a.stars || 0);
+                if (sd !== 0) return sd;
+                return new Date(b.pushedAt) - new Date(a.pushedAt);
+            });
     }
 
     function escapeHtml(s) {

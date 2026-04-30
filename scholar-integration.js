@@ -326,8 +326,12 @@ class ScholarIntegration {
             return;
         }
 
-        // Sort newest first by default
-        const sorted = [...publications].sort((a, b) => (b.year || 0) - (a.year || 0));
+        // Sort by citation count (most cited first), tie-break newest first
+        const sorted = [...publications].sort((a, b) => {
+            const cd = (b.citedBy || 0) - (a.citedBy || 0);
+            if (cd !== 0) return cd;
+            return (b.year || 0) - (a.year || 0);
+        });
 
         viewport.innerHTML = '';
         sorted.forEach((pub, i) => {
