@@ -4580,3 +4580,51 @@ section + section {
         font-size: 1.2rem;
     }
 }
+
+/* Static publication list baked in by scripts/build_publications.py.
+   Visible before JS runs (and to crawlers); scholar-integration.js clears the
+   viewport and replaces it with the interactive carousel for real visitors. */
+.publications-static {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    text-align: left;
+    width: 100%;
+}
+
+.publication-static-item {
+    padding: 1rem 1.25rem;
+    border-left: 3px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 0 8px 8px 0;
+}
+
+.publication-static-title {
+    display: block;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 0.35rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.publication-static-title:hover,
+.publication-static-title:focus-visible {
+    text-decoration: underline;
+}
+
+.publication-static-authors,
+.publication-static-meta {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.78;
+    line-height: 1.4;
+}
+
+.publication-static-meta {
+    margin-top: 0.2rem;
+    opacity: 0.62;
+}

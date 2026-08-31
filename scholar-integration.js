@@ -254,13 +254,10 @@ class ScholarIntegration {
         const heroName = document.querySelector('.name');
         if (heroName) heroName.textContent = profileData.name;
 
-        const heroDescription = document.querySelector('.hero-description');
-        if (heroDescription && profileData.affiliation) {
-            heroDescription.innerHTML = `
-                Researcher at ${profileData.affiliation}, advancing knowledge through 
-                innovative research, collaborative projects, and academic excellence.
-            `;
-        }
+        // The hero description is intentionally left alone. The static copy in
+        // index.html names the actual research areas (generative models, cardiac
+        // MRI reconstruction, tokenization); overwriting it with the generic
+        // affiliation blurb lost that wording for both readers and crawlers.
     }
 
     // Update statistics with animation
