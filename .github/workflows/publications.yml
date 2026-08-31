@@ -18,12 +18,11 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
+      # No setup-python step: ubuntu-latest ships Python 3, and
+      # build_publications.py uses only the standard library. One fewer action
+      # to keep current as runner Node versions get deprecated.
       - name: Regenerate publication markup
         run: python3 scripts/build_publications.py
 
