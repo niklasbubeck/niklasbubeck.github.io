@@ -54,3 +54,6 @@ coverage/
 test_api.js
 debug_api.html
 test.html
+
+# Personal CV — do not publish
+cv_bubeck.pdf
