@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://niklasbubeck.github.io/sitemap.xml
+Sitemap: https://niklasbubeck.com/sitemap.xml
