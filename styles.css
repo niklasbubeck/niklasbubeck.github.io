@@ -1326,7 +1326,7 @@ section {
 /* Research Section */
 .research-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
     gap: 2rem;
 }
 
@@ -4198,7 +4198,8 @@ body.dark-mode .rc-header-token { background: transparent; }
 /* Research card text spacing in new layout */
 .research-card-cardiac h3,
 .research-card-genai   h3,
-.research-card-token   h3 {
+.research-card-token   h3,
+.research-card-trust   h3 {
     margin-top: 0;
 }
 

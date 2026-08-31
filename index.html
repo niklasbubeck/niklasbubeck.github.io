@@ -733,7 +733,7 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Research Areas</h2>
-                <p class="section-subtitle">Exploring the frontiers of knowledge</p>
+                <p class="section-subtitle">Generative modeling for medical imaging &mdash; and whether the results can be trusted</p>
             </div>
             <div class="research-grid">
                 <!-- Cardiac MRI — handdrawn ECG + heart -->
@@ -756,11 +756,11 @@
                         </svg>
                     </div>
                     <h3>Cardiac MRI</h3>
-                    <p>Conducting research on innovative artificial intelligence techniques to enhance cardiac MRI, focusing on improving image reconstruction quality and achieving higher resolution through state-of-the-art superresolution algorithms.</p>
+                    <p>Recovering full 3D cardiac anatomy from sparse acquisitions. Work with <strong>NVIDIA</strong> interpolates in the latent space of a diffusion model to reconstruct complete volumes, while a parallel line analyses cardiac function directly from undersampled k-space &mdash; skipping image reconstruction entirely.</p>
                     <ul class="research-tags">
-                        <li>Cardiac MRI</li>
-                        <li>Medical Imaging</li>
-                        <li>Superresolution</li>
+                        <li>k-Space</li>
+                        <li>Diffusion Models</li>
+                        <li>3D Reconstruction</li>
                     </ul>
                 </div>
 
@@ -804,11 +804,11 @@
                         </svg>
                     </div>
                     <h3>Generative AI</h3>
-                    <p>Applying diffusion models and generative AI to healthcare and medical imaging, with a focus on exploring the spectrum between reconstruction and generation.</p>
+                    <p>Where does reconstruction end and generation begin? My DGM4MICCAI work maps that spectrum for cardiac MRI. Related projects synthesise glioblastoma progression under physics- and biophysics-guided constraints, so growth follows tumour dynamics rather than image statistics alone.</p>
                     <ul class="research-tags">
-                        <li>Generative AI</li>
+                        <li>Image Synthesis</li>
+                        <li>Physics-Guided</li>
                         <li>Autoregressive Generation</li>
-                        <li>Diffusion Models</li>
                     </ul>
                 </div>
 
@@ -836,11 +836,45 @@
                         </svg>
                     </div>
                     <h3>Tokenization</h3>
-                    <p>Developing advanced techniques to tokenize high-dimensional medical data, enabling more effective use of generative AI models in healthcare applications.</p>
+                    <p>Compressing high-dimensional medical volumes into compact discrete representations that generative models can work with directly. The open question is how far compression can go before anatomical fidelity starts to break down. <em>Publication forthcoming.</em></p>
                     <ul class="research-tags">
                         <li>Autoencoders</li>
-                        <li>Tokenization</li>
+                        <li>Discrete Representations</li>
                         <li>High Compression</li>
+                    </ul>
+                </div>
+
+                <!-- Trustworthy Medical AI — handdrawn shield under a magnifier -->
+                <div class="research-card research-card-trust">
+                    <div class="rc-header">
+                        <svg class="research-sketch" viewBox="0 0 160 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <defs>
+                                <filter id="rough-trust" x="-3%" y="-3%" width="106%" height="106%">
+                                    <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="11" result="noise"/>
+                                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5"/>
+                                </filter>
+                            </defs>
+                            <g filter="url(#rough-trust)" fill="none" stroke="currentColor"
+                               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                <!-- Shield drawn as one continuous stroke -->
+                                <path d="M 40 11 C 48 14 54 15 56 18 C 57 28 50 41 40 47 C 30 41 23 28 24 18 C 26 15 32 14 40 11 Z"/>
+                                <!-- Check inside the shield -->
+                                <path d="M 33 27 C 35 30 37 33 38 35 C 41 29 44 23 48 19"/>
+                                <!-- Magnifier lens as a Bezier loop, so it picks up the wobble -->
+                                <path d="M 117 25 C 117 32 111 38 104 38 C 97 38 91 32 91 25 C 91 18 97 12 104 12 C 111 12 117 18 117 25 Z"/>
+                                <!-- Handle -->
+                                <path d="M 113 35 C 116 39 120 43 124 47"/>
+                                <!-- The flaw it finds -->
+                                <path d="M 98 25 C 100 21 102 29 104 25 C 106 21 108 29 110 25"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <h3>Trustworthy Medical AI</h3>
+                    <p>Medical AI that clears a benchmark can still fail patients. I build red-teaming agents that probe medical language models for failures static benchmarks miss (<strong>Nature Health</strong>, 2026), and study with <strong>Harvard Medical School</strong> how reconstruction choices propagate into downstream fairness.</p>
+                    <ul class="research-tags">
+                        <li>Red-Teaming</li>
+                        <li>Fairness</li>
+                        <li>Evaluation</li>
                     </ul>
                 </div>
             </div>
