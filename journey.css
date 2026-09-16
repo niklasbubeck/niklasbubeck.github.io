@@ -278,3 +278,1116 @@ section[id] {
         transition: none;
     }
 }
+
+
+/* ============================================================
+   Planet Journey — rocket module (pilot rocket + Return to Earth)
+   Every rule is scoped under html.journey…; the pilot element only
+   exists while the journey is active, so the plain page is untouched.
+   Prefix .jr-*, keyframes jr*.
+   ============================================================ */
+
+/* Pilot shell: fixed, body-level, driven by --jr-x/--jr-y/--jr-a (JS).
+   Hidden whenever the journey classes are gone (live reduced-motion opt-out). */
+.jr-pilot {
+    display: none;
+}
+
+html.journey .jr-pilot {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 60px;
+    height: 120px;
+    z-index: 900;
+    pointer-events: none;
+    transform: translate(var(--jr-x, 0px), var(--jr-y, 0px)) rotate(var(--jr-a, 0deg));
+    will-change: transform;
+}
+
+html.journey-v .jr-pilot {
+    left: auto;
+    right: 14px;
+}
+
+/* Idle bob lives on its own element and on the `translate` property, so it
+   never fights the JS-driven `transform` above. Amplitude shrinks with the
+   sky band so the fin tips stay inside the lane (0 at 88px, 3px from 98px). */
+html.journey .jr-bob {
+    --jr-bob-amp: clamp(0px, calc((var(--sky-band) - 92px) / 2), 3px);
+    position: relative;
+    width: 60px;
+    height: 120px;
+    animation: jrBob 3.2s ease-in-out infinite;
+}
+
+html.journey-v .jr-bob {
+    --jr-bob-amp: 5px;
+    scale: 0.6;
+}
+
+/* Standing on Earth: no hover */
+html.journey .jr-pilot.is-grounded .jr-bob {
+    animation: none;
+}
+
+@keyframes jrBob {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 calc(-1 * var(--jr-bob-amp, 3px)); }
+}
+
+/* The styles.css .space-rocket drawing, pinned to 0,0 without its bounce */
+html.journey .jr-pilot .space-rocket {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: auto;
+    animation: none;
+}
+
+/* Exhaust length follows the scroll velocity; dims while docked */
+html.journey .jr-pilot .rocket-exhaust {
+    height: calc(44px + var(--jr-thrust, 0) * 100px);
+    opacity: 1;
+    animation: none;
+    transition: height 0.15s ease-out, opacity 0.35s ease;
+}
+
+html.journey .jr-pilot.is-docked .rocket-exhaust {
+    opacity: 0.45;
+}
+
+/* No flame while parked on Earth; it ignites on the first scrolled pixel */
+html.journey .jr-pilot.is-grounded .rocket-exhaust {
+    opacity: 0;
+}
+
+/* styles.css already shrinks the drawing on phones (45x90 at <=768px, 35x70
+   at <=480px): follow its box and ease the extra scale so the pilot stays
+   ~36x72 on screen; the exhaust keeps the same proportion to the body */
+@media (max-width: 768px) {
+    html.journey-v .jr-pilot,
+    html.journey-v .jr-bob {
+        width: 45px;
+        height: 90px;
+    }
+
+    html.journey-v .jr-bob {
+        scale: 0.8;
+    }
+
+    html.journey-v .jr-pilot .rocket-exhaust {
+        height: calc(33px + var(--jr-thrust, 0) * 75px);
+    }
+}
+
+@media (max-width: 480px) {
+    html.journey-v .jr-pilot,
+    html.journey-v .jr-bob {
+        width: 35px;
+        height: 70px;
+    }
+
+    html.journey-v .jr-bob {
+        scale: 1;
+    }
+
+    html.journey-v .jr-pilot .rocket-exhaust {
+        height: calc(26px + var(--jr-thrust, 0) * 58px);
+    }
+}
+
+/* Lift-off puffs — ported from space.css @keyframes fumes as a one-shot
+   transform/opacity burst behind the tail; shown only while .is-launching */
+html.journey .jr-fumes {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 60px;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+html.journey .jr-pilot.is-launching .jr-fumes {
+    display: block;
+}
+
+html.journey .jr-fumes li {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(245, 245, 245, 0.85);
+    opacity: 0;
+    transform: scale(0.3);
+    animation: jrFumes 0.9s ease-out both;
+}
+
+html.journey .jr-fumes li:nth-child(1) { left: 18px; top: 8px; --jr-dx: 0px; --jr-dy: 60px; }
+html.journey .jr-fumes li:nth-child(2) { width: 18px; height: 18px; left: 6px; top: 20px; --jr-dx: -10px; --jr-dy: 48px; animation-delay: 0.06s; }
+html.journey .jr-fumes li:nth-child(3) { width: 18px; height: 18px; left: 36px; top: 20px; --jr-dx: 10px; --jr-dy: 48px; animation-delay: 0.12s; }
+html.journey .jr-fumes li:nth-child(4) { width: 14px; height: 14px; left: 12px; top: 44px; --jr-dx: -8px; --jr-dy: 40px; animation-delay: 0.2s; }
+html.journey .jr-fumes li:nth-child(5) { width: 14px; height: 14px; left: 34px; top: 44px; --jr-dx: 8px; --jr-dy: 40px; animation-delay: 0.26s; }
+
+@keyframes jrFumes {
+    0% { transform: translate(0, 0) scale(0.3); opacity: 0; }
+    12% { opacity: 0.9; }
+    100% { transform: translate(var(--jr-dx, 0px), var(--jr-dy, 40px)) scale(1.4); opacity: 0; }
+}
+
+/* ------------------------------------------------------------
+   Return to Earth: the back-to-top mini rocket points and flies left
+   in the horizontal journey (styles.css:2261-2308 re-aimed)
+   ------------------------------------------------------------ */
+html.journey-h #back-to-top .mini-rocket {
+    transform: rotate(-90deg);
+}
+
+html.journey-h #back-to-top:hover .mini-rocket {
+    transform: rotate(-90deg) scale(1.1);
+    animation: jrMiniHover 0.6s ease;
+}
+
+html.journey-h #back-to-top.launching .mini-rocket {
+    animation: jrReturnLaunch 2s ease-out forwards;
+}
+
+@keyframes jrMiniHover {
+    0% { transform: rotate(-90deg) scale(1.1) translateY(0); }
+    50% { transform: rotate(-90deg) scale(1.1) translateY(-3px); }
+    100% { transform: rotate(-90deg) scale(1.1) translateY(0); }
+}
+
+@keyframes jrReturnLaunch {
+    0% {
+        transform: translateX(0) rotate(-90deg) scale(1.1);
+        opacity: 1;
+    }
+    10% {
+        transform: translateX(-20px) rotate(-90deg) scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: translateX(-100vw) rotate(-90deg) scale(1.3);
+        opacity: 0.8;
+    }
+    70% {
+        transform: translateX(-120vw) rotate(-90deg) scale(1.4);
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateX(-150vw) rotate(-90deg) scale(1.5);
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   Planet Journey — planets module (.jp-*, keyframes jp*)
+   Five planets peeking over the logbook cards, the Beyond decor,
+   the Galilean dots on the research cards and the ring-particle
+   carousel dots. Drawn in the .space-earth idiom: flat disc, inset
+   terminator, box-shadow stamps, soft stamped glow. Everything is
+   scoped under html.journey…; the plain page never sees it.
+   ============================================================ */
+
+/* Injected decor stays hidden outside the journey (live opt-out) */
+.jp-planet,
+.jp-beyond,
+.jp-moon-dot {
+    display: none;
+}
+
+/* ------------------------------------------------------------
+   Planet stage: covers its panel and clips everything the planet
+   paints (glow, rings, moons) to it, z-index 1 under the card (z 2).
+   The .jp-body box is the disc; moons and rings hang around it.
+   ------------------------------------------------------------ */
+html.journey .jp-planet {
+    --jp-glow: 0.35;
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+html.journey .jp-body {
+    position: absolute;
+    width: var(--jp-size);
+    height: var(--jp-size);
+}
+
+html.journey body.dark-mode .jp-planet {
+    --jp-glow: 0.25;
+}
+
+html.journey .jp-disc,
+html.journey .jp-moon,
+html.journey .jp-ring,
+html.journey .jp-orbit {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+}
+
+html.journey .jp-disc {
+    inset: 0;
+    z-index: 2;
+    overflow: hidden;
+    background-color: var(--jp-c);
+}
+
+/* Surface stamps drift like the Earth's landmasses; the stamp row
+   repeats every --jp-period so the loop is seamless */
+html.journey .jp-disc::before {
+    content: "";
+    position: absolute;
+    display: block;
+    animation: jpDrift var(--jp-spin) linear infinite;
+}
+
+@keyframes jpDrift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(calc(-1 * var(--jp-period))); }
+}
+
+/* Horizontal journey: the disc's centre sits near the card's
+   top-right corner, so it peeks out above and beside the opaque
+   card. --jp-reach keeps moons and rings inside the panel at 1024px */
+html.journey-h .jp-body {
+    top: calc(var(--nav-h) + var(--sky-band) - 0.45 * var(--jp-size));
+    right: max(var(--jp-reach), calc((100vw - var(--card-w)) / 2 - 0.35 * var(--jp-size)));
+}
+
+html.journey-h .jp-jupiter .jp-body {
+    top: calc(var(--nav-h) + 8px); /* the giant sits further into the sky */
+}
+
+/* Vertical journey: ~72px at top 12px / right 20px of the 96px band;
+   the stage starts in the 28px gap above the panel so the glow is
+   not cut at the panel's top edge */
+html.journey-v .jp-planet {
+    top: -28px;
+}
+
+html.journey-v .jp-body {
+    top: 40px;
+    right: max(20px, calc(var(--jp-reach) * var(--jp-k) + 8px));
+    transform: scale(var(--jp-k));
+    transform-origin: 100% 0;
+}
+
+/* ------------------------------------------------------------
+   Moons: the .space-moon orbit pattern on an ellipse (--jp-rx/--jp-ry,
+   tilted by --jp-tilt); z-index flips behind the disc on the far half
+   ------------------------------------------------------------ */
+html.journey .jp-moon {
+    left: 50%;
+    top: 50%;
+    width: var(--jp-d);
+    height: var(--jp-d);
+    margin: calc(var(--jp-d) / -2) 0 0 calc(var(--jp-d) / -2);
+    background: currentColor;
+    box-shadow: inset calc(var(--jp-d) / -3) 0 rgba(0, 0, 0, 0.3);
+    animation: jpOrbit var(--jp-t) linear infinite;
+    animation-delay: var(--jp-delay, 0s);
+    animation-direction: var(--jp-dir, normal);
+    transition: box-shadow 0.25s ease;
+}
+
+html.journey .jp-moon.is-lit {
+    box-shadow:
+        inset calc(var(--jp-d) / -3) 0 rgba(0, 0, 0, 0.3),
+        0 0 0 4px rgba(255, 255, 255, 0.22),
+        0 0 18px 4px currentColor;
+}
+
+@keyframes jpOrbit {
+    0% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 1), calc(var(--jp-ry) * 0)) scale(0.930);
+        opacity: 0.90;
+        z-index: 3;
+    }
+    6.25% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0.9239), calc(var(--jp-ry) * 0.3827)) scale(0.987);
+        opacity: 0.94;
+        z-index: 3;
+    }
+    12.5% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0.7071), calc(var(--jp-ry) * 0.7071)) scale(1.036);
+        opacity: 0.97;
+        z-index: 3;
+    }
+    18.75% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0.3827), calc(var(--jp-ry) * 0.9239)) scale(1.069);
+        opacity: 0.99;
+        z-index: 3;
+    }
+    25% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0), calc(var(--jp-ry) * 1)) scale(1.080);
+        opacity: 1.00;
+        z-index: 3;
+    }
+    31.25% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -0.3827), calc(var(--jp-ry) * 0.9239)) scale(1.069);
+        opacity: 0.99;
+        z-index: 3;
+    }
+    37.5% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -0.7071), calc(var(--jp-ry) * 0.7071)) scale(1.036);
+        opacity: 0.97;
+        z-index: 3;
+    }
+    43.75% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -0.9239), calc(var(--jp-ry) * 0.3827)) scale(0.987);
+        opacity: 0.94;
+        z-index: 3;
+    }
+    50% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -1), calc(var(--jp-ry) * 0)) scale(0.930);
+        opacity: 0.90;
+        z-index: 1;
+    }
+    56.25% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -0.9239), calc(var(--jp-ry) * -0.3827)) scale(0.873);
+        opacity: 0.86;
+        z-index: 1;
+    }
+    62.5% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -0.7071), calc(var(--jp-ry) * -0.7071)) scale(0.824);
+        opacity: 0.83;
+        z-index: 1;
+    }
+    68.75% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * -0.3827), calc(var(--jp-ry) * -0.9239)) scale(0.791);
+        opacity: 0.81;
+        z-index: 1;
+    }
+    75% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0), calc(var(--jp-ry) * -1)) scale(0.780);
+        opacity: 0.80;
+        z-index: 1;
+    }
+    81.25% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0.3827), calc(var(--jp-ry) * -0.9239)) scale(0.791);
+        opacity: 0.81;
+        z-index: 1;
+    }
+    87.5% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0.7071), calc(var(--jp-ry) * -0.7071)) scale(0.824);
+        opacity: 0.83;
+        z-index: 1;
+    }
+    93.75% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 0.9239), calc(var(--jp-ry) * -0.3827)) scale(0.873);
+        opacity: 0.86;
+        z-index: 1;
+    }
+    100% {
+        transform: rotate(var(--jp-tilt, 0deg)) translate(calc(var(--jp-rx) * 1), calc(var(--jp-ry) * 0)) scale(0.930);
+        opacity: 0.90;
+        z-index: 3;
+    }
+}
+
+/* Rings (Saturn, Uranus): the same ellipse twice, clipped into a
+   back half under the disc and a front half over it */
+html.journey .jp-ring {
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    transform: rotate(var(--jp-tilt, 0deg));
+}
+
+html.journey .jp-ring::before {
+    content: "";
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+}
+
+html.journey .jp-ring-front {
+    z-index: 3;
+}
+
+html.journey .jp-orbit {
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    transform: rotate(var(--jp-tilt, 0deg));
+}
+
+/* ------------------------------------------------------------
+   Mars — rust disc, ochre lowland stamps, polar cap, Phobos + Deimos
+   ------------------------------------------------------------ */
+html.journey .jp-mars {
+    --jp-size: 150px;
+    --jp-reach: 50px;
+    --jp-k: 0.48;
+    --jp-c: #B9553A;
+}
+
+html.journey .jp-mars .jp-disc {
+    --jp-period: 300px;
+    --jp-spin: 48s;
+    box-shadow:
+        inset -52px 0 rgba(0, 0, 0, 0.3),
+        0 0 0 18px rgba(185, 85, 58, 0.1),
+        0 0 0 36px rgba(185, 85, 58, 0.08),
+        0 0 0 54px rgba(185, 85, 58, 0.06),
+        0 0 75px rgba(185, 85, 58, var(--jp-glow));
+}
+
+html.journey .jp-mars .jp-disc::before {
+    top: 32px;
+    left: 0;
+    width: 44px;
+    height: 14px;
+    border-radius: 20px;
+    background: #CB7A50;
+    box-shadow:
+        40px 58px 0 -2px #A34A33,
+        72px 22px 0 4px #CB7A50,
+        112px 92px 0 -3px #9E4530,
+        150px 44px 0 2px #D08A5C,
+        190px 78px 0 -4px #A34A33,
+        232px 14px 0 1px #CB7A50,
+        262px 60px 0 -1px #9E4530,
+        300px 0 0 0 #CB7A50,
+        340px 58px 0 -2px #A34A33,
+        372px 22px 0 4px #CB7A50,
+        412px 92px 0 -3px #9E4530,
+        450px 44px 0 2px #D08A5C,
+        490px 78px 0 -4px #A34A33,
+        532px 14px 0 1px #CB7A50,
+        562px 60px 0 -1px #9E4530;
+}
+
+/* Polar cap */
+html.journey .jp-mars .jp-disc::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 46px;
+    height: 14px;
+    margin-left: -23px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+html.journey .jp-moon-phobos {
+    color: #9C8F84;
+    --jp-d: 8px;
+    --jp-rx: 92px;
+    --jp-ry: 30px;
+    --jp-tilt: -12deg;
+    --jp-t: 11s;
+}
+
+html.journey .jp-moon-deimos {
+    color: #B5AAA0;
+    --jp-d: 5px;
+    --jp-rx: 118px;
+    --jp-ry: 40px;
+    --jp-tilt: -12deg;
+    --jp-t: 24s;
+    --jp-delay: -9s;
+}
+
+/* ------------------------------------------------------------
+   Jupiter — banded giant, Great Red Spot, dashed Galilean orbit
+   ------------------------------------------------------------ */
+html.journey .jp-jupiter {
+    --jp-size: 320px;
+    --jp-reach: 92px;
+    --jp-k: 0.3;
+    --jp-c: #E8D9BF;
+}
+
+html.journey .jp-jupiter .jp-disc {
+    --jp-period: 480px;
+    --jp-spin: 80s;
+    background-image: linear-gradient(180deg,
+        #E8D9BF 0 12%, #C89158 12% 20%, #E8D9BF 20% 33%, #A66A3A 33% 44%,
+        #E8D9BF 44% 56%, #C89158 56% 66%, #E8D9BF 66% 78%, #A66A3A 78% 86%, #E8D9BF 86%);
+    box-shadow:
+        inset -110px 0 rgba(0, 0, 0, 0.28),
+        0 0 0 32px rgba(200, 145, 88, 0.1),
+        0 0 0 64px rgba(200, 145, 88, 0.08),
+        0 0 0 96px rgba(200, 145, 88, 0.06),
+        0 0 120px rgba(200, 145, 88, var(--jp-glow));
+}
+
+/* Band swirls */
+html.journey .jp-jupiter .jp-disc::before {
+    top: 16px;
+    left: 0;
+    width: 70px;
+    height: 10px;
+    border-radius: 10px;
+    background: #DCC6A3;
+    box-shadow:
+        90px 30px 0 -1px #D4A46E,
+        170px 66px 0 1px #DCC6A3,
+        60px 106px 0 -2px #B87F4A,
+        230px 124px 0 0 #B87F4A,
+        130px 152px 0 2px #DCC6A3,
+        300px 178px 0 -1px #D4A46E,
+        40px 242px 0 1px #DCC6A3,
+        260px 258px 0 -1px #B87F4A,
+        150px 290px 0 -2px #DCC6A3,
+        480px 0 0 0 #DCC6A3,
+        570px 30px 0 -1px #D4A46E,
+        650px 66px 0 1px #DCC6A3,
+        540px 106px 0 -2px #B87F4A,
+        710px 124px 0 0 #B87F4A,
+        610px 152px 0 2px #DCC6A3,
+        780px 178px 0 -1px #D4A46E,
+        520px 242px 0 1px #DCC6A3,
+        740px 258px 0 -1px #B87F4A,
+        630px 290px 0 -2px #DCC6A3;
+}
+
+/* Great Red Spot — in the upper-right slice that shows above the card */
+html.journey .jp-jupiter .jp-disc::after {
+    content: "";
+    position: absolute;
+    top: 46px;
+    left: 190px;
+    width: 58px;
+    height: 26px;
+    border-radius: 50%;
+    background: #C75A3D;
+    border: 3px solid #D98866;
+}
+
+html.journey .jp-jupiter .jp-orbit {
+    width: 472px;
+    height: 168px;
+    margin: -84px 0 0 -236px;
+    --jp-tilt: -16deg;
+}
+
+html.journey .jp-jupiter .jp-moon {
+    --jp-rx: 236px;
+    --jp-ry: 84px;
+    --jp-tilt: -16deg;
+}
+
+html.journey .jp-moon-io       { color: #D9A441; --jp-d: 10px; --jp-t: 16s; }
+html.journey .jp-moon-europa   { color: #E8E4DA; --jp-d: 9px;  --jp-t: 26s; --jp-delay: -7s; }
+html.journey .jp-moon-ganymede { color: #9C8D7C; --jp-d: 12px; --jp-t: 40s; --jp-delay: -21s; }
+html.journey .jp-moon-callisto { color: #5E534A; --jp-d: 11px; --jp-t: 60s; --jp-delay: -36s; }
+
+/* ------------------------------------------------------------
+   Saturn — pale disc inside a tilted ring drawn as two halves
+   ------------------------------------------------------------ */
+html.journey .jp-saturn {
+    --jp-size: 170px;
+    --jp-reach: 92px;
+    --jp-k: 0.42;
+    --jp-c: #E3CFA0;
+}
+
+html.journey .jp-saturn .jp-disc {
+    --jp-period: 340px;
+    --jp-spin: 60s;
+    background-image: linear-gradient(180deg,
+        #E3CFA0 0 22%, #D9C08A 22% 30%, #E3CFA0 30% 52%, #DEC896 52% 64%, #E3CFA0 64% 80%, #D9C08A 80% 86%, #E3CFA0 86%);
+    box-shadow:
+        inset -60px 0 rgba(0, 0, 0, 0.28),
+        0 0 0 20px rgba(227, 207, 160, 0.1),
+        0 0 0 40px rgba(227, 207, 160, 0.08),
+        0 0 0 60px rgba(227, 207, 160, 0.06),
+        0 0 85px rgba(227, 207, 160, var(--jp-glow));
+}
+
+html.journey .jp-saturn .jp-disc::before {
+    top: 40px;
+    left: 0;
+    width: 50px;
+    height: 7px;
+    border-radius: 8px;
+    background: #ECDCB4;
+    box-shadow:
+        90px 34px 0 0 #D3B87E,
+        170px 74px 0 -1px #ECDCB4,
+        60px 108px 0 0 #D3B87E,
+        230px 20px 0 -1px #ECDCB4,
+        340px 0 0 0 #ECDCB4,
+        430px 34px 0 0 #D3B87E,
+        510px 74px 0 -1px #ECDCB4,
+        400px 108px 0 0 #D3B87E,
+        570px 20px 0 -1px #ECDCB4;
+}
+
+html.journey .jp-saturn .jp-ring {
+    width: 340px;
+    height: 92px;
+    margin: -46px 0 0 -170px;
+    --jp-tilt: -14deg;
+    box-shadow: inset 0 0 0 7px rgba(232, 214, 180, 0.55);
+}
+
+html.journey .jp-saturn .jp-ring::before {
+    inset: 11px;
+    box-shadow: inset 0 0 0 16px rgba(232, 214, 180, 0.45);
+}
+
+html.journey .jp-saturn .jp-ring-back  { clip-path: inset(0 0 50% 0); }
+html.journey .jp-saturn .jp-ring-front { clip-path: inset(50% 0 0 0); }
+
+/* ------------------------------------------------------------
+   Uranus — mint disc, thin near-vertical ring
+   ------------------------------------------------------------ */
+html.journey .jp-uranus {
+    --jp-size: 140px;
+    --jp-reach: 8px;
+    --jp-k: 0.51;
+    --jp-c: #A7CFCB;
+}
+
+html.journey .jp-uranus .jp-disc {
+    --jp-period: 280px;
+    --jp-spin: 70s;
+    background-image: linear-gradient(180deg, #A7CFCB 0 30%, #B6DAD6 30% 44%, #A7CFCB 44% 70%, #9CC6C1 70% 78%, #A7CFCB 78%);
+    box-shadow:
+        inset -48px 0 rgba(0, 0, 0, 0.26),
+        0 0 0 17px rgba(167, 207, 203, 0.1),
+        0 0 0 34px rgba(167, 207, 203, 0.08),
+        0 0 0 51px rgba(167, 207, 203, 0.06),
+        0 0 70px rgba(167, 207, 203, var(--jp-glow));
+}
+
+html.journey .jp-uranus .jp-disc::before {
+    top: 50px;
+    left: 0;
+    width: 60px;
+    height: 6px;
+    border-radius: 6px;
+    background: #BCDFDB;
+    box-shadow:
+        100px 40px 0 -1px #BCDFDB,
+        180px -10px 0 0 #BCDFDB,
+        280px 0 0 0 #BCDFDB,
+        380px 40px 0 -1px #BCDFDB,
+        460px -10px 0 0 #BCDFDB;
+}
+
+html.journey .jp-uranus .jp-ring {
+    width: 30px;
+    height: 210px;
+    margin: -105px 0 0 -15px;
+    --jp-tilt: 12deg;
+    box-shadow: inset 0 0 0 2px rgba(214, 236, 234, 0.5);
+}
+
+html.journey .jp-uranus .jp-ring::before {
+    inset: 4px;
+    box-shadow: inset 0 0 0 1px rgba(214, 236, 234, 0.35);
+}
+
+html.journey .jp-uranus .jp-ring-back  { clip-path: inset(0 50% 0 0); }
+html.journey .jp-uranus .jp-ring-front { clip-path: inset(0 0 0 50%); }
+
+/* ------------------------------------------------------------
+   Neptune — deep blue disc, dark spot + wind streak, Triton retrograde
+   ------------------------------------------------------------ */
+html.journey .jp-neptune {
+    --jp-size: 150px;
+    --jp-reach: 12px;
+    --jp-k: 0.48;
+    --jp-c: #3F63A8;
+}
+
+html.journey .jp-neptune .jp-disc {
+    --jp-period: 300px;
+    --jp-spin: 44s;
+    box-shadow:
+        inset -52px 0 rgba(0, 0, 0, 0.32),
+        0 0 0 18px rgba(63, 99, 168, 0.1),
+        0 0 0 36px rgba(63, 99, 168, 0.08),
+        0 0 0 54px rgba(63, 99, 168, 0.06),
+        0 0 75px rgba(63, 99, 168, var(--jp-glow));
+}
+
+html.journey .jp-neptune .jp-disc::before {
+    top: 24px;
+    left: 0;
+    width: 56px;
+    height: 8px;
+    border-radius: 8px;
+    background: #365896;
+    box-shadow:
+        70px 44px 0 1px #365896,
+        150px 88px 0 -1px #4A70B8,
+        40px 112px 0 0 #365896,
+        220px 20px 0 -1px #4A70B8,
+        300px 0 0 0 #365896,
+        370px 44px 0 1px #365896,
+        450px 88px 0 -1px #4A70B8,
+        340px 112px 0 0 #365896,
+        520px 20px 0 -1px #4A70B8;
+}
+
+/* Great Dark Spot with the bright wind streak above it */
+html.journey .jp-neptune .jp-disc::after {
+    content: "";
+    position: absolute;
+    top: 62px;
+    left: 40px;
+    width: 34px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2A4680;
+    box-shadow: 6px -22px 0 -5px rgba(255, 255, 255, 0.4);
+}
+
+html.journey .jp-moon-triton {
+    color: #D8CFC4;
+    --jp-d: 7px;
+    --jp-rx: 84px;
+    --jp-ry: 40px;
+    --jp-tilt: 28deg;
+    --jp-t: 26s;
+    --jp-dir: reverse;
+}
+
+/* ------------------------------------------------------------
+   Pause everything unless the panel is near the viewport
+   ------------------------------------------------------------ */
+html.journey .jp-planet,
+html.journey .jp-planet *,
+html.journey .jp-planet *::before {
+    animation-play-state: paused;
+}
+
+html.journey .panel.is-near .jp-planet,
+html.journey .panel.is-near .jp-planet *,
+html.journey .panel.is-near .jp-planet *::before {
+    animation-play-state: running;
+}
+
+/* ------------------------------------------------------------
+   Beyond — the pale blue dot, its caption and the last motto
+   ------------------------------------------------------------ */
+html.journey .jp-beyond {
+    display: block;
+    padding: 2rem 1rem 1rem;
+    text-align: center;
+}
+
+html.journey .jp-pale-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    margin: 0 auto 1.4rem;
+    border-radius: 50%;
+    background: #A9CCF3;
+    box-shadow:
+        0 0 0 4px rgba(120, 170, 240, 0.16),
+        0 0 0 9px rgba(120, 170, 240, 0.07),
+        0 0 14px 2px rgba(150, 190, 245, 0.7);
+}
+
+html.journey .jp-caption {
+    margin: 0 0 1rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    color: var(--text-muted);
+}
+
+html.journey .jp-motto {
+    display: inline-block;
+    margin: 0 0 1.5rem;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-color);
+    text-shadow: 0 0 20px rgba(42, 40, 36, 0.12);
+    transform: rotate(-5deg);
+}
+
+html.journey body.dark-mode .jp-motto {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+}
+
+html.journey-v .jp-motto {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+/* ------------------------------------------------------------
+   Metaphor details in the cards
+   ------------------------------------------------------------ */
+/* One Galilean dot per research card (lights its orbit moon on hover) */
+html.journey .research-card {
+    position: relative;
+}
+
+html.journey .jp-moon-dot {
+    display: block;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--jp-c);
+    box-shadow: 0 0 0 1px rgba(128, 120, 110, 0.35);
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+html.journey .research-card:hover .jp-moon-dot {
+    opacity: 1;
+    box-shadow: 0 0 0 3px rgba(128, 120, 110, 0.18), 0 0 10px var(--jp-c);
+}
+
+html.journey .jp-moon-dot-io       { --jp-c: #D9A441; }
+html.journey .jp-moon-dot-europa   { --jp-c: #E8E4DA; }
+html.journey .jp-moon-dot-ganymede { --jp-c: #9C8D7C; }
+html.journey .jp-moon-dot-callisto { --jp-c: #5E534A; }
+
+/* Carousel dots become ring particles (Saturn, Uranus); lifted above
+   the card's sticky "more" fade so the active one stays readable */
+html.journey .publications-carousel-dot,
+html.journey .github-carousel-dot {
+    position: relative;
+    z-index: 1;
+    width: 14px;
+    height: 5px;
+    border-radius: 3px;
+}
+
+
+/* ============================================================
+   Planet Journey — nav module: flight path along the navbar's
+   bottom edge, arrival live region, focus targets and the
+   list-view toggle. Every rule is gated under html.journey
+   except the few that only touch elements journey-nav.js
+   injects itself (so the plain page is untouched).
+   ============================================================ */
+
+/* Flight path (JS-injected into .navbar) */
+.jn-path {
+    display: none;
+}
+
+html.journey .jn-path {
+    --jn-n: 6;
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px; /* sits on the navbar's 1px border */
+    height: 2px;
+}
+
+html.journey .jn-rail {
+    position: relative;
+    width: min(1160px, calc(100% - 40px)); /* the .nav-container content box */
+    height: 100%;
+    margin: 0 auto;
+}
+
+html.journey .jn-line,
+html.journey .jn-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--accent-secondary);
+    pointer-events: none;
+}
+
+html.journey .jn-line {
+    opacity: 0.3;
+}
+
+html.journey .jn-fill {
+    transform-origin: left center;
+    transform: scaleX(var(--jn-p, var(--journey-p, 0)));
+}
+
+/* Stops: 24px hit area centred on the line, 10px dot inside */
+html.journey .jn-stop {
+    --jn-tx: -50%;
+    position: absolute;
+    top: 50%;
+    left: calc(var(--jn-i, 0) / var(--jn-n) * 100%);
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+html.journey .jn-stop:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 1px;
+    border-radius: 50%;
+}
+
+html.journey .jn-dot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--nav-bg-scrolled); /* paper disc so the dot reads the same over navbar and sky */
+    transition: transform 0.25s ease;
+}
+
+html.journey .jn-dot::before,
+html.journey .jn-dot::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: var(--accent-secondary);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* halo (current stop only) */
+html.journey .jn-dot::before {
+    inset: -4px;
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+/* the stop itself: faint ahead, solid once passed */
+html.journey .jn-dot::after {
+    inset: 0;
+    opacity: 0.35;
+}
+
+html.journey .jn-stop.jn-passed .jn-dot::after,
+html.journey .jn-stop[aria-current="true"] .jn-dot::after,
+html.journey .jn-stop:hover .jn-dot::after,
+html.journey .jn-stop:focus-visible .jn-dot::after {
+    opacity: 1;
+}
+
+html.journey .jn-stop[aria-current="true"] .jn-dot,
+html.journey .jn-stop:hover .jn-dot,
+html.journey .jn-stop:focus-visible .jn-dot {
+    transform: scale(1.2);
+}
+
+html.journey .jn-stop[aria-current="true"] .jn-dot::before {
+    opacity: 0.25;
+    transform: none;
+}
+
+/* Hover / focus label, hanging below the line into the sky band */
+html.journey .jn-tip {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 50%;
+    padding: 3px 9px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translate(var(--jn-tx), -4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+}
+
+html.journey .jn-stop:focus-visible .jn-tip {
+    opacity: 1;
+    transform: translate(var(--jn-tx), 0);
+}
+
+/* pointer hover only — a tap on a phone must not leave the label stuck */
+@media (hover: hover) {
+    html.journey .jn-stop:hover .jn-tip {
+        opacity: 1;
+        transform: translate(var(--jn-tx), 0);
+    }
+}
+
+/* keep the first/last labels inside the viewport */
+html.journey .jn-stop:first-of-type {
+    --jn-tx: 0;
+}
+
+html.journey .jn-stop:first-of-type .jn-tip {
+    left: 0;
+}
+
+html.journey .jn-stop:last-of-type {
+    --jn-tx: 0;
+}
+
+html.journey .jn-stop:last-of-type .jn-tip {
+    left: auto;
+    right: 0;
+}
+
+/* Arrival announcements (visually hidden) */
+.jn-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* Headings that receive focus on arrival: ring only for keyboard-driven trips
+   (script focus otherwise counts as focus-visible right after load) */
+html.journey [data-jn-focus]:focus {
+    outline: none;
+}
+
+html.journey [data-jn-focus].jn-ring:focus {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 6px;
+    border-radius: 4px;
+}
+
+/* List / journey view toggle (only in the DOM when injected) */
+.jn-list-toggle {
+    display: none;
+}
+
+html.journey .jn-list-toggle.jn-to-list,
+html:not(.journey) .jn-list-toggle.jn-to-journey {
+    display: flex;
+}
+
+.jn-list-toggle[hidden] {
+    display: none;
+}
+
+/* Vertical journey on phones: styles.css centres .nav-controls over the
+   logo; with two buttons it would cover the name, so dock it beside the
+   hamburger instead */
+@media (max-width: 768px) {
+    html.journey-v .nav-controls {
+        left: auto;
+        right: 61px;
+        transform: none;
+        gap: 0.75rem;
+    }
+}
