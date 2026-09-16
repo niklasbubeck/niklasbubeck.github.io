@@ -84,18 +84,28 @@ function initNavigation() {
             const targetSection = document.getElementById(targetId);
             
             if (targetSection) {
-                const offsetTop = targetSection.offsetTop - 70; // Account for navbar height
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
+                scrollToSection(targetSection);
             }
         });
     });
 }
 
+// Scroll a section into view (the journey owns the scroller when active)
+function scrollToSection(section) {
+    if (window.journey && window.journey.active) {
+        window.journey.goToId(section.id);
+        return;
+    }
+    const offsetTop = section.offsetTop - 70; // Account for navbar height
+    window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+    });
+}
+
 // Update active navigation item based on scroll position
 function updateActiveNavigation() {
+    if (window.journey && window.journey.active) return;
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
     
@@ -147,6 +157,7 @@ function initAnimations() {
 
     // Parallax effect for hero section
     window.addEventListener('scroll', function() {
+        if (window.journey && window.journey.active) return;
         const scrolled = window.pageYOffset;
         const hero = document.querySelector('.hero');
         if (hero) {
@@ -331,10 +342,14 @@ function initBackToTop() {
             backToTopButton.classList.add('launching');
             
             // Start scrolling to top
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            if (window.journey && window.journey.active) {
+                window.journey.goTo(0);
+            } else {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
             
             // Remove launching class after animation completes
             setTimeout(() => {
@@ -373,7 +388,8 @@ function debounce(func, wait) {
 
 // Add smooth reveal animation for sections
 function addRevealAnimation() {
-    const revealElements = document.querySelectorAll('section');
+    if (window.journey && window.journey.active) return;
+    const revealElements = document.querySelectorAll('section:not(.beyond)'); // the footer's section never hides
     
     const revealObserver = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {

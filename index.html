@@ -35,7 +35,12 @@
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="mask-icon" href="assets/favicon.svg" color="#3E4A3A">
 
+    <script>(function(){try{if(localStorage.getItem('layout')==='list')return;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;var h=matchMedia('(min-width: 821px) and (min-height: 560px)').matches;document.documentElement.classList.add('journey',h?'journey-h':'journey-v');}catch(e){}})();</script>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="journey.css">
+    <link rel="stylesheet" href="journey-rocket.css">
+    <link rel="stylesheet" href="journey-planets.css">
+    <link rel="stylesheet" href="journey-nav.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -595,8 +600,9 @@
         </div>
     </nav>
 
+    <main id="journey" class="journey-track">
     <!-- Hero Section -->
-    <section id="home" class="hero">
+    <section id="home" class="hero panel" data-planet="earth" data-stop="Earth">
         <!-- Space Theme Elements -->
         <div class="space-rocket">
             <div class="rocket-body"></div>
@@ -659,7 +665,8 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="about">
+    <section id="about" class="about panel" data-planet="mars" data-stop="Mars">
+        <div class="panel-card">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">About Me</h2>
@@ -732,10 +739,12 @@
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Research Section -->
-    <section id="research" class="research">
+    <section id="research" class="research panel" data-planet="jupiter" data-stop="Jupiter">
+        <div class="panel-card">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Research Areas</h2>
@@ -885,10 +894,12 @@
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Publications Section -->
-    <section id="publications" class="publications">
+    <section id="publications" class="publications panel" data-planet="saturn" data-stop="Saturn">
+        <div class="panel-card">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Publications</h2>
@@ -957,10 +968,12 @@
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- GitHub Pages projects (loaded via GitHub API, carousel) -->
-    <section id="projects" class="github-projects">
+    <section id="projects" class="github-projects panel" data-planet="uranus" data-stop="Uranus">
+        <div class="panel-card">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Project sites</h2>
@@ -970,10 +983,12 @@
                 <p class="github-projects-message github-projects-loading">Loading projects from GitHub…</p>
             </div>
         </div>
+        </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="contact">
+    <section id="contact" class="contact panel" data-planet="neptune" data-stop="Neptune">
+        <div class="panel-card">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Get In Touch</h2>
@@ -1028,19 +1043,27 @@
                 </div>
             </div>
         </div>
+        </div>
     </section>
 
-
-
-    <!-- Footer -->
-    <footer class="footer">
+    <!-- Beyond: end of the journey, holds the footer -->
+    <section id="beyond" class="beyond panel" data-planet="beyond" data-stop="Beyond">
+        <div class="panel-card">
         <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 Niklas Bubeck. All rights reserved.</p>
-                <p>Last updated: <span id="last-updated"></span></p>
-            </div>
+            <div class="beyond-decor" aria-hidden="true"></div>
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="container">
+                    <div class="footer-content">
+                        <p>&copy; 2024 Niklas Bubeck. All rights reserved.</p>
+                        <p>Last updated: <span id="last-updated"></span></p>
+                    </div>
+                </div>
+            </footer>
         </div>
-    </footer>
+        </div>
+    </section>
+    </main>
 
     <!-- Back to top button -->
     <button id="back-to-top" class="back-to-top" aria-label="Back to top">
@@ -1053,6 +1076,10 @@
         </div>
     </button>
 
+    <script src="journey.js"></script>
+    <script src="journey-rocket.js"></script>
+    <script src="journey-planets.js"></script>
+    <script src="journey-nav.js"></script>
     <script src="script.js"></script>
     <script src="scholar-integration.js"></script>
     <script src="github-projects.js"></script>

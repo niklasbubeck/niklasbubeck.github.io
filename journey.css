@@ -1,0 +1,280 @@
+/* ============================================================
+   Planet Journey — layout layer (core)
+   Every rule is scoped under html.journey… except the few
+   ungated additions at the end. The plain page (reduced motion,
+   localStorage.layout = 'list', no JS) must stay as it is today.
+   ============================================================ */
+
+/* Tokens */
+html.journey {
+    --nav-h: 70px;
+    --sky-band: clamp(88px, 12vh, 120px);
+    --sky-band-v: 96px;
+    --card-w: min(1120px, calc(100vw - 64px));
+}
+
+/* Sky — one fixed deep-space backdrop behind everything (JS-injected) */
+html.journey body {
+    background: #000;
+}
+
+html.journey .journey-sky {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+html.journey .journey-sky-base,
+html.journey .journey-sky-far,
+html.journey .journey-sky-near {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+}
+
+html.journey .journey-sky-base {
+    right: 0;
+    background: radial-gradient(ellipse at 50% 60%, #050507 0%, #020203 70%, #000 100%);
+}
+
+html.journey body.dark-mode .journey-sky-base {
+    background: radial-gradient(ellipse at 50% 60%, #0E0D0B 0%, #0A0908 60%, #070605 100%);
+}
+
+/* Star tiles from .hero::before/::after; wide enough that the -35vw
+   parallax plus the 200px `stars` drift never exposes the right edge */
+html.journey .journey-sky-far {
+    width: 160vw;
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 160px 30px, #fff, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    translate: calc(var(--journey-p, 0) * -15vw) 0;
+    animation: stars 20s linear infinite;
+}
+
+html.journey .journey-sky-near {
+    width: 160vw;
+    background-image:
+        radial-gradient(1px 1px at 50px 60px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 120px 20px, #fff, transparent),
+        radial-gradient(2px 2px at 180px 90px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 220px 50px, #fff, transparent),
+        radial-gradient(1px 1px at 270px 10px, rgba(255,255,255,0.8), transparent);
+    background-repeat: repeat;
+    background-size: 300px 150px;
+    translate: calc(var(--journey-p, 0) * -35vw) 0;
+    animation: stars 30s linear infinite reverse;
+}
+
+/* Panels sit on the shared sky (both modes): the hero's gradient and the
+   sections' own backgrounds go (body.dark-mode .hero/.research/… use
+   !important), as do the hero star tiles and the in-hero rocket;
+   Earth, Moon, motto and shooting stars stay */
+html.journey .panel {
+    background: transparent !important;
+}
+
+html.journey .hero::before,
+html.journey .hero::after,
+html.journey .hero .space-rocket {
+    display: none;
+}
+
+/* Panels: neutralise section padding + the section + section border */
+html.journey .panel + .panel {
+    border-top: 0;
+}
+
+html.journey .panel-card > .container {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Footer sits inside the Beyond card */
+html.journey .beyond .footer {
+    background: transparent !important; /* overrides body.dark-mode .footer !important */
+    color: var(--text-muted);
+    padding: 0;
+}
+
+/* ------------------------------------------------------------
+   Horizontal journey (desktop)
+   ------------------------------------------------------------ */
+html.journey-h,
+html.journey-h body {
+    height: 100%;
+    overflow: hidden;
+}
+
+html.journey-h .journey-track {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    z-index: 1;
+}
+
+html.journey-h .journey-track::-webkit-scrollbar {
+    display: none;
+}
+
+html.journey-h .panel {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100%;
+    position: relative;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 0;
+}
+
+html.journey-h .hero.panel {
+    min-height: 0;
+}
+
+/* Keep the motto clear of the greeting on short viewports (768px tall) */
+html.journey-h .space-motto {
+    top: max(80px, calc(50% - 275px));
+}
+
+html.journey-h .panel-card {
+    position: absolute;
+    top: calc(var(--nav-h) + var(--sky-band));
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--card-w);
+    max-height: calc(100% - var(--nav-h) - var(--sky-band) - 3vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    z-index: 2;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    padding: 2.5rem 2rem 0; /* bottom padding lives on .container so the sticky hint reaches the card's edge */
+}
+
+html.journey-h .panel-card > .container {
+    padding-bottom: 2.5rem;
+}
+
+html.journey-h .panel-card .section-header {
+    margin-bottom: 2.5rem;
+}
+
+/* "More below" hint (JS-injected last child, toggled via .has-more) */
+html.journey-h .panel-more {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    height: 48px;
+    margin: -48px -2rem 0;
+    padding-bottom: 6px;
+    background: linear-gradient(transparent, var(--card-bg));
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+}
+
+html.journey-h .panel-card.has-more .panel-more {
+    opacity: 1;
+}
+
+html.journey-h .beyond .panel-card {
+    text-align: center;
+}
+
+/* ------------------------------------------------------------
+   Vertical journey (phones / short viewports)
+   ------------------------------------------------------------ */
+html.journey-v .journey-track {
+    display: block;
+}
+
+html.journey-v .panel {
+    position: relative;
+}
+
+html.journey-v .panel:not(.hero) {
+    padding: var(--sky-band-v) 0 0;
+}
+
+html.journey-v .panel-card {
+    position: relative;
+    z-index: 2;
+    margin: 0 16px 28px;
+    padding: 1.75rem 1.25rem;
+    max-height: none;
+    overflow: visible;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+html.journey-v .beyond .panel-card {
+    text-align: center;
+}
+
+/* ------------------------------------------------------------
+   Ungated additions (harmless on the plain page)
+   ------------------------------------------------------------ */
+section[id] {
+    scroll-margin-top: 70px;
+}
+
+/* The injected "more" hint only renders in the horizontal journey */
+.panel-more {
+    display: none;
+}
+
+/* The footer moved into #beyond; keep it looking as before */
+.beyond {
+    padding: 0;
+    border-top: 0;
+}
+
+.beyond > .panel-card > .container {
+    max-width: none;
+    padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero::before,
+    .hero::after,
+    .space-rocket,
+    .space-rocket .rocket-exhaust,
+    .space-earth::before,
+    .space-earth::after,
+    .space-moon,
+    .shooting-star,
+    .profile-decoration,
+    .profile-decoration-inner,
+    .profile-decoration-third,
+    .scroll-indicator {
+        animation: none;
+    }
+
+    .fade-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
