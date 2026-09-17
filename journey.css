@@ -149,11 +149,43 @@ html.journey-h .space-motto {
     top: max(80px, calc(50% - 275px));
 }
 
+/* Narrower grids stack the hero text taller: lift and shrink the motto */
+@media (max-width: 1299px) {
+    html.journey-h .space-motto {
+        top: 74px;
+        font-size: 1.5rem;
+    }
+}
+
+/* Short viewports: centre the hero below the navbar and tighten the column */
+@media (max-height: 640px) {
+    html.journey-h .hero.panel {
+        padding-top: var(--nav-h);
+    }
+
+    html.journey-h .hero-title {
+        font-size: 2.6rem;
+    }
+
+    html.journey-h .hero-subtitle {
+        font-size: 1.25rem;
+    }
+
+    html.journey-h .hero-description {
+        margin-bottom: 1rem;
+    }
+
+    html.journey-h .social-links {
+        margin-top: 1.25rem;
+    }
+}
+
 html.journey-h .panel-card {
     position: absolute;
     top: calc(var(--nav-h) + var(--sky-band));
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    margin: 0 auto; /* centred by layout, not a transform: no half-pixel blur on odd widths */
     width: var(--card-w);
     max-height: calc(100% - var(--nav-h) - var(--sky-band) - 3vh);
     overflow-y: auto;
@@ -175,19 +207,25 @@ html.journey-h .panel-card .section-header {
     margin-bottom: 2.5rem;
 }
 
-/* "More below" hint (JS-injected last child, toggled via .has-more) */
+/* The publications card is the tallest: a tighter header keeps its dots in view at 900px */
+html.journey-h .publications .section-header {
+    margin-bottom: 1.5rem;
+}
+
+/* "More below" hint (JS-injected last child, toggled via .has-more): the fade
+   is solid in its lower half so the chevron always sits on paper, not on text */
 html.journey-h .panel-more {
     position: sticky;
     bottom: 0;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    height: 48px;
-    margin: -48px -2rem 0;
-    padding-bottom: 6px;
-    background: linear-gradient(transparent, var(--card-bg));
+    height: 64px;
+    margin: -64px -2rem 0;
+    padding-bottom: 8px;
+    background: linear-gradient(to bottom, transparent 0, var(--card-bg) 60%);
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     opacity: 0;
     transition: opacity 0.25s ease;
     pointer-events: none;
@@ -197,7 +235,12 @@ html.journey-h .panel-card.has-more .panel-more {
     opacity: 1;
 }
 
+/* The last stop's card is short: centre it in the panel instead of pinning it to the band */
 html.journey-h .beyond .panel-card {
+    top: 0;
+    bottom: 0;
+    height: fit-content;
+    margin: auto;
     text-align: center;
 }
 
@@ -220,7 +263,7 @@ html.journey-v .panel-card {
     position: relative;
     z-index: 2;
     margin: 0 16px 28px;
-    padding: 1.75rem 1.25rem;
+    padding: 1.75rem 2rem 1.75rem 1.25rem; /* the right padding is the pilot's lane: text never reaches under it */
     max-height: none;
     overflow: visible;
     background: var(--card-bg);
@@ -229,8 +272,25 @@ html.journey-v .panel-card {
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
 
+/* The last band holds no planet: let the footer card follow more closely */
+html.journey-v .beyond.panel {
+    padding-top: 48px;
+}
+
 html.journey-v .beyond .panel-card {
     text-align: center;
+}
+
+/* Phones: the flight-path dots, the motto and the title share the top strip —
+   drop the motto and the hero content so all three get their own line */
+@media (max-width: 768px) {
+    html.journey-v .hero .space-motto {
+        top: 86px;
+    }
+
+    html.journey-v .hero-content {
+        padding-top: 64px;
+    }
 }
 
 /* ------------------------------------------------------------
@@ -263,13 +323,32 @@ section[id] {
     .space-rocket .rocket-exhaust,
     .space-earth::before,
     .space-earth::after,
-    .space-moon,
     .shooting-star,
+    .scroll-indicator,
+    .mini-rocket-exhaust {
+        animation: none;
+    }
+
+    /* The orbits freeze mid-flight (their static base pose stacks the moon on the
+       Earth and the three ring dots on one spot): keyframe 0 puts the moon at the
+       bottom centre; the rings hold different angles */
+    .space-moon,
     .profile-decoration,
     .profile-decoration-inner,
-    .profile-decoration-third,
-    .scroll-indicator {
-        animation: none;
+    .profile-decoration-third {
+        animation-play-state: paused;
+    }
+
+    .profile-decoration {
+        animation-delay: -5s;
+    }
+
+    .profile-decoration-inner {
+        animation-delay: -10s;
+    }
+
+    .profile-decoration-third {
+        animation-delay: -20s;
     }
 
     .fade-in {
@@ -304,11 +383,18 @@ html.journey .jr-pilot {
     pointer-events: none;
     transform: translate(var(--jr-x, 0px), var(--jr-y, 0px)) rotate(var(--jr-a, 0deg));
     will-change: transform;
+    transition: opacity 0.35s ease;
+}
+
+/* Out of sight: parked with no room beside the Earth (short h viewports), or
+   waiting in the hero before the first scroll (v) */
+html.journey .jr-pilot.is-tucked {
+    opacity: 0;
 }
 
 html.journey-v .jr-pilot {
     left: auto;
-    right: 14px;
+    right: 10px;
 }
 
 /* Idle bob lives on its own element and on the `translate` property, so it
@@ -327,9 +413,12 @@ html.journey-v .jr-bob {
     scale: 0.6;
 }
 
-/* Standing on Earth: no hover */
-html.journey .jr-pilot.is-grounded .jr-bob {
-    animation: none;
+/* At the 88px minimum band (≤733px tall) the rotated fins would graze the
+   navbar and the card edge: fly a touch smaller */
+@media (max-height: 733px) {
+    html.journey-h .jr-bob {
+        scale: 0.9;
+    }
 }
 
 @keyframes jrBob {
@@ -358,9 +447,9 @@ html.journey .jr-pilot.is-docked .rocket-exhaust {
     opacity: 0.45;
 }
 
-/* No flame while parked on Earth; it ignites on the first scrolled pixel */
+/* Parked beside the Earth: a faint idle flame, full burn from the first scrolled pixel */
 html.journey .jr-pilot.is-grounded .rocket-exhaust {
-    opacity: 0;
+    opacity: 0.3;
 }
 
 /* styles.css already shrinks the drawing on phones (45x90 at <=768px, 35x70
@@ -441,8 +530,19 @@ html.journey .jr-fumes li:nth-child(5) { width: 14px; height: 14px; left: 34px; 
 
 /* ------------------------------------------------------------
    Return to Earth: the back-to-top mini rocket points and flies left
-   in the horizontal journey (styles.css:2261-2308 re-aimed)
+   in the horizontal journey (styles.css:2261-2308 re-aimed). It sits
+   at the left end of the sky band — Earth is behind you — where it
+   never covers a card (bottom-right would sit on the card's corner).
    ------------------------------------------------------------ */
+html.journey-h #back-to-top {
+    top: calc(var(--nav-h) + var(--sky-band) / 2 - 20px);
+    bottom: auto;
+    right: auto;
+    left: calc((100vw - var(--card-w)) / 2);
+    width: 40px;
+    height: 40px;
+}
+
 html.journey-h #back-to-top .mini-rocket {
     transform: rotate(-90deg);
 }
@@ -578,9 +678,20 @@ html.journey-v .jp-planet {
 
 html.journey-v .jp-body {
     top: 40px;
-    right: max(20px, calc(var(--jp-reach) * var(--jp-k) + 8px));
+    right: max(34px, calc(var(--jp-reach) * var(--jp-k) + 8px)); /* 34px keeps the stamped glow inside the panel */
     transform: scale(var(--jp-k));
     transform-origin: 100% 0;
+}
+
+/* Tablets have the room for bigger planets in a taller band */
+@media (min-width: 600px) {
+    html.journey-v {
+        --sky-band-v: 136px;
+    }
+
+    html.journey-v .jp-body {
+        transform: scale(calc(var(--jp-k) * 1.4));
+    }
 }
 
 /* ------------------------------------------------------------
@@ -1038,17 +1149,17 @@ html.journey .jp-neptune .jp-disc::before {
         520px 20px 0 -1px #4A70B8;
 }
 
-/* Great Dark Spot with the bright wind streak above it */
+/* Great Dark Spot with a thin pale wind streak above it (weather, not gloss) */
 html.journey .jp-neptune .jp-disc::after {
     content: "";
     position: absolute;
-    top: 62px;
-    left: 40px;
-    width: 34px;
-    height: 18px;
+    top: 64px;
+    left: 42px;
+    width: 30px;
+    height: 14px;
     border-radius: 50%;
-    background: #2A4680;
-    box-shadow: 6px -22px 0 -5px rgba(255, 255, 255, 0.4);
+    background: #223B72;
+    box-shadow: 8px -16px 0 -5px rgba(214, 228, 255, 0.3);
 }
 
 html.journey .jp-moon-triton {
@@ -1083,6 +1194,7 @@ html.journey .jp-beyond {
     display: block;
     padding: 2rem 1rem 1rem;
     text-align: center;
+    pointer-events: none;
 }
 
 html.journey .jp-pale-dot {
@@ -1129,7 +1241,8 @@ html.journey-v .jp-motto {
 /* ------------------------------------------------------------
    Metaphor details in the cards
    ------------------------------------------------------------ */
-/* One Galilean dot per research card (lights its orbit moon on hover) */
+/* One Galilean dot per research card (lights its orbit moon on hover) —
+   small and quiet, so it reads as a coloured mark, not a status badge */
 html.journey .research-card {
     position: relative;
 }
@@ -1137,14 +1250,14 @@ html.journey .research-card {
 html.journey .jp-moon-dot {
     display: block;
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 10px;
-    height: 10px;
+    top: 14px;
+    right: 14px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--jp-c);
-    box-shadow: 0 0 0 1px rgba(128, 120, 110, 0.35);
-    opacity: 0.7;
+    box-shadow: 0 0 0 1px rgba(128, 120, 110, 0.25);
+    opacity: 0.5;
     pointer-events: none;
     transition: opacity 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1215,7 +1328,7 @@ html.journey .jn-line {
 
 html.journey .jn-fill {
     transform-origin: left center;
-    transform: scaleX(var(--jn-p, var(--journey-p, 0)));
+    transform: scaleX(var(--jn-p, 0)); /* --jn-p is set by journey-nav from journey:progress in both modes */
 }
 
 /* Stops: 24px hit area centred on the line, 10px dot inside */
@@ -1354,16 +1467,12 @@ html.journey .jn-stop:last-of-type .jn-tip {
     white-space: nowrap;
 }
 
-/* Headings that receive focus on arrival: ring only for keyboard-driven trips
-   (script focus otherwise counts as focus-visible right after load) */
+/* Headings that receive programmatic focus on arrival: no ring (Arrow/Home/End,
+   wheel and nav-click arrivals are not Tab-driven focus; the live region and the
+   card itself show where the trip landed). Tab-driven focus keeps the browser ring
+   on the element that was tabbed to. */
 html.journey [data-jn-focus]:focus {
     outline: none;
-}
-
-html.journey [data-jn-focus].jn-ring:focus {
-    outline: 2px solid var(--accent-secondary);
-    outline-offset: 6px;
-    border-radius: 4px;
 }
 
 /* List / journey view toggle (only in the DOM when injected) */
@@ -1371,20 +1480,37 @@ html.journey [data-jn-focus].jn-ring:focus {
     display: none;
 }
 
-html.journey .jn-list-toggle.jn-to-list,
-html:not(.journey) .jn-list-toggle.jn-to-journey {
+html.journey .jn-list-toggle.jn-to-list:not([hidden]),
+html:not(.journey) .jn-list-toggle.jn-to-journey:not([hidden]) {
     display: flex;
 }
 
-.jn-list-toggle[hidden] {
+/* The flight path would straddle the top edge of the open phone menu */
+html.journey .navbar:has(.nav-menu.active) .jn-path {
     display: none;
 }
 
-/* Vertical journey on phones: styles.css centres .nav-controls over the
-   logo; with two buttons it would cover the name, so dock it beside the
-   hamburger instead */
+/* The extra button must not wrap the logo onto two lines (desktop navbar at 769-900px) */
+html.journey .nav-logo h2 {
+    white-space: nowrap;
+}
+
+@media (min-width: 769px) and (max-width: 900px) {
+    html.journey .nav-menu {
+        gap: 1.25rem;
+    }
+
+    html.journey .nav-controls {
+        gap: 0.5rem;
+    }
+}
+
+/* Phones: styles.css centres .nav-controls over the logo; with the injected
+   toggle beside the dark-mode button it would cover the name, so dock the pair
+   beside the hamburger. .jn-has-toggle is set by journey-nav.js whenever it
+   injects a toggle (journey or list view), so the plain page without one is untouched */
 @media (max-width: 768px) {
-    html.journey-v .nav-controls {
+    .nav-controls.jn-has-toggle {
         left: auto;
         right: 61px;
         transform: none;

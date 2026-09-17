@@ -5,8 +5,10 @@ A dynamic, responsive personal portfolio website for academic researchers, featu
 ## 🌟 Features
 
 - **Dynamic Publications**: Automatically fetches and displays publications from Semantic Scholar
-- **Space-themed Design**: Modern, animated hero section with CSS rocket and Earth
+- **Planet Journey**: The site reads as one flight from Earth to Neptune — on desktop you travel left to right between planets (wheel, arrow keys, swipe or the flight path in the navbar), on phones the same trip runs top to bottom. A rocket flies along with you.
+- **Space-themed Design**: CSS-drawn rocket, Earth and planets on a deep-space sky, with each section on a "logbook" card
 - **Responsive Layout**: Optimized for desktop, tablet, and mobile devices
+- **Always a plain page underneath**: `prefers-reduced-motion`, the list-view toggle in the navbar and visitors without JavaScript get the original vertical site, so search engines and assistive technology see every section as before
 - **Publication Filtering**: Advanced search, sort, and category filtering
 - **Statistics Animation**: Real-time academic metrics display
 - **Professional Sections**: Research, industry experience, organizations, and contact

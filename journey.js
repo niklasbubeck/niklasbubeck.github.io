@@ -2,6 +2,7 @@
    Planet Journey — core: track, input, progress and events.
    Public API on window.journey; events on document:
    journey:ready, journey:progress, journey:arrive, journey:modechange
+   (--journey-p / --journey-v live on the injected .journey-sky)
    ============================================================ */
 (function () {
     'use strict';
@@ -11,9 +12,10 @@
     var SETTLE_MS = 180;
     var JOURNEY_MQ = '(min-width: 821px) and (min-height: 560px)';
     var REDUCED_MQ = '(prefers-reduced-motion: reduce)';
-    var WHEEL = { tail: 4, threshold: 60, lock: 850, arm: 350, decay: 200 };
-    var WHEEL_NATIVE = '.publications-viewport, .github-projects-viewport, input, textarea, select, [contenteditable]';
+    /* threshold 40: a Firefox pixel-mode notch is ~48-57px; trackpad tails stay below it */
+    var WHEEL = { tail: 4, threshold: 40, lock: 850, arm: 350, decay: 200 };
     var FIELDS = 'input, textarea, select, [contenteditable]';
+    var CAROUSELS = '.publications-viewport, .github-projects-viewport'; /* native horizontal scrollers */
     var CUE_H = '<span>Scroll, swipe or press → to launch</span><i class="fas fa-chevron-right"></i>';
 
     var journey = window.journey = {
@@ -28,7 +30,7 @@
         velocity: velocity
     };
 
-    var track = document.getElementById('journey');
+    var track = document.getElementById('journey-track');
     if (!track || !root.classList.contains('journey')) { return; }
 
     var mode = root.classList.contains('journey-h') ? 'h' : 'v';
@@ -46,6 +48,7 @@
 
     var navbar = document.getElementById('navbar');
     var backToTop = document.getElementById('back-to-top');
+    var sky = null; /* injected backdrop; carries the per-frame --journey-p/--journey-v */
     var cue = document.querySelector('.hero .scroll-indicator');
     var cueHtml = cue ? cue.innerHTML : '';
     var mqJourney = window.matchMedia(JOURNEY_MQ);
@@ -124,7 +127,7 @@
 
     /* ---- DOM injected only when the journey is active ---- */
     function injectSky() {
-        var sky = document.createElement('div');
+        sky = document.createElement('div');
         sky.className = 'journey-sky';
         sky.setAttribute('aria-hidden', 'true');
         sky.innerHTML = '<div class="journey-sky-base"></div><div class="journey-sky-far"></div><div class="journey-sky-near"></div>';
@@ -165,13 +168,34 @@
         }
     }
 
+    /* A card that scrolls is also a Tab stop (a scrollable region needs keyboard access) */
+    function updateHasMoreFor(card) {
+        var scrolls = mode === 'h' && card.scrollHeight > card.clientHeight + 1;
+        card.classList.toggle('has-more', scrolls && card.scrollHeight - card.clientHeight - card.scrollTop > 8);
+        if (scrolls && card.getAttribute('tabindex') !== '0') {
+            var h2 = card.querySelector('h2');
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'region');
+            if (h2) { card.setAttribute('aria-label', h2.textContent.trim()); }
+        } else if (!scrolls && card.getAttribute('tabindex') === '0') {
+            card.removeAttribute('tabindex');
+            card.removeAttribute('role');
+            card.removeAttribute('aria-label');
+        }
+    }
+
     function updateHasMore() {
         for (var k = 0; k < stops.length; k++) {
-            var card = stops[k].card;
-            if (card) {
-                card.classList.toggle('has-more', mode === 'h' && card.scrollHeight - card.clientHeight - card.scrollTop > 8);
-            }
+            if (stops[k].card) { updateHasMoreFor(stops[k].card); }
         }
+    }
+
+    /* Any card movement (wheel, keys, native scroll over a form field) starts the
+       edge guard, so the next wheel notch cannot fly off the moment the card stops */
+    function onCardScroll(e) {
+        edgeArmedUntil = Date.now() + WHEEL.arm;
+        acc = 0;
+        updateHasMoreFor(e.currentTarget);
     }
 
     /* 'auto' must be an instant jump; html { scroll-behavior: smooth } would
@@ -187,6 +211,12 @@
         if (!journey.active) { return; }
         i = clamp(i);
         var instant = !!(opts && opts.behavior === 'auto');
+        /* a stop opens at its top (its card is still off screen here) — unless focus
+           is already inside it, i.e. Tab brought a deeper element into view */
+        var card = i !== journey.index ? stops[i].card : null;
+        if (card && card.scrollTop && !stops[i].el.contains(document.activeElement)) {
+            card.scrollTop = 0;
+        }
         setIndex(i);
         if (mode === 'h') {
             track.scrollTo({ left: i * track.clientWidth, behavior: instant ? 'auto' : 'smooth' });
@@ -240,8 +270,12 @@
         vel = vel * 0.7 + delta * 0.3;
         if (vel < 0.05) { vel = 0; }
         var p = progress();
-        root.style.setProperty('--journey-p', p.toFixed(4));
-        root.style.setProperty('--journey-v', Math.min(1, vel / 60).toFixed(3));
+        /* written on the sky, not <html>: a custom property on the root invalidates
+           the whole document's style every frame (~6 ms); the sky is its only consumer */
+        if (sky) {
+            sky.style.setProperty('--journey-p', p.toFixed(4));
+            sky.style.setProperty('--journey-v', Math.min(1, vel / 60).toFixed(3));
+        }
         emit('journey:progress', { p: p, v: vel, index: journey.index, mode: mode });
         if (delta > 0 || vel > 0) { rafId = requestAnimationFrame(tick); }
     }
@@ -253,28 +287,34 @@
     }
 
     /* ---- input (horizontal mode) ---- */
+    /* Vertical wheel scrolls the card first, then pages; horizontal wheel (trackpad
+       swipe, tilt wheel) pages too, since a short native swipe would only snap back.
+       Form fields and the carousels (native horizontal scrollers) keep their wheel. */
     function onWheel(e) {
         if (!journey.active || mode !== 'h') { return; }
-        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { return; }
-        if (closest(e.target, WHEEL_NATIVE)) { return; }
+        if (e.ctrlKey || e.metaKey) { return; } /* pinch-zoom arrives as a wheel event */
+        var horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+        if (closest(e.target, horizontal ? CAROUSELS : FIELDS)) { return; }
         var now = Date.now();
-        var dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1);
+        var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
+        var d = (horizontal ? e.deltaX : e.deltaY) * unit;
         if (now < lockUntil) { e.preventDefault(); return; }
         var card = stops[journey.index].card;
-        if (canScroll(card, dy)) {
+        if (!horizontal && canScroll(card, d)) {
             if (!card.contains(e.target)) {
                 e.preventDefault();
-                card.scrollBy({ top: dy });
+                card.scrollBy({ top: d });
             }
             edgeArmedUntil = now + WHEEL.arm;
             acc = 0;
             return;
         }
         e.preventDefault();
-        if (now < edgeArmedUntil || Math.abs(dy) < WHEEL.tail) { return; }
+        if (now < edgeArmedUntil || Math.abs(d) < WHEEL.tail) { return; }
         if (now - lastWheelAt > WHEEL.decay) { acc = 0; }
         lastWheelAt = now;
-        acc += dy;
+        /* a line/page-mode notch (Firefox mouse wheel) is a whole step, never a tail */
+        acc += e.deltaMode ? (d > 0 ? 1 : -1) * WHEEL.threshold : d;
         if (Math.abs(acc) >= WHEEL.threshold) {
             goTo(journey.index + (acc > 0 ? 1 : -1));
             lockUntil = now + WHEEL.lock;
@@ -322,7 +362,7 @@
     }
 
     function onClick(e) {
-        if (!journey.active || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
+        if (!journey.active || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
         var a = closest(e.target, 'a[href^="#"]');
         if (!a || a.classList.contains('nav-link')) { return; }
         var id = a.getAttribute('href').slice(1);
@@ -334,7 +374,8 @@
     function onHashChange() {
         if (!journey.active) { return; }
         var id = location.hash.slice(1);
-        if (indexOf(id) >= 0) { goToId(id); }
+        if (!id) { goTo(0); } /* Back to the bare URL is Home */
+        else if (indexOf(id) >= 0) { goToId(id); }
     }
 
     function onResize() {
@@ -413,9 +454,11 @@
     listen(mqReduced, onReducedChange);
     for (var k = 0; k < stops.length; k++) {
         if (stops[k].card) {
-            stops[k].card.addEventListener('scroll', updateHasMore, { passive: true });
+            stops[k].card.addEventListener('scroll', onCardScroll, { passive: true });
             if (window.ResizeObserver) {
-                new ResizeObserver(updateHasMore).observe(stops[k].card.firstElementChild || stops[k].card);
+                (function (card) {
+                    new ResizeObserver(function () { updateHasMoreFor(card); }).observe(card.firstElementChild || card);
+                })(stops[k].card);
             }
         }
     }
@@ -434,8 +477,8 @@
 
 
 /* ============================================================
-   Planet Journey — rocket module: the pilot rocket that stands on the
-   hero Earth, lifts off into the sky band and cruises to Neptune
+   Planet Journey — rocket module: the pilot rocket that hovers beside
+   the hero Earth, lifts off into the sky band and cruises to Neptune
    (h), or flies down the right edge (v); plus the "Return to Earth"
    back-to-top label. Reads window.journey and its events only.
    ============================================================ */
@@ -453,16 +496,21 @@
     var LANE_START = 0.20;        /* vw */
     var LANE_END = 0.64;          /* vw */
     var V_TOP = 0.18;             /* vh (vertical journey) */
-    var V_BOTTOM = 0.78;          /* vh */
+    var V_BOTTOM = 0.62;          /* vh — ends beside the Beyond card, clear of the back-to-top button */
+    var V_HIDDEN_P = 0.03;        /* v: the pilot only appears once the hero starts to scroll */
     var MAX_V = 60;               /* px/frame that counts as full thrust (same scale as --journey-v) */
+    var IDLE_FLAME = 44;          /* px of exhaust below the body at zero thrust */
     var DOCK_MS = 300;
     var PUFF_MS = 1100;           /* keep .is-launching at least this long so the puffs finish */
     var MARGIN = 6;
-    /* Standing poses: angle on Earth's rim, clockwise from the top. The contract
-       pose (top centre, nose up) comes first; the others are the fallbacks used
-       when the hero text sits over Earth's top (buttons/social links). */
-    var POSES = [0, -30, 30, -45, 45, -60, 60, -75, 75, -90, 90];
-    /* hero elements the standing rocket must not cover: the text blocks, the
+    /* Parked poses: upright, hovering beside the Earth (offset of the body box from
+       the Earth's right edge / centre line). The first pose that covers nothing wins;
+       if every pose collides (very short viewports) the parked rocket stays hidden. */
+    var POSES = [
+        { dx: 25, dy: 0 }, { dx: 25, dy: -40 }, { dx: 25, dy: 40 }, { dx: 25, dy: -80 },
+        { dx: -285, dy: 0 }, { dx: -285, dy: -40 }, { dx: -285, dy: 40 }
+    ];
+    /* hero elements the parked rocket must not cover: the text blocks, the
        individual buttons and social icons (their wrappers span the whole column) */
     var OBSTACLES = '.hero-text > :not(.hero-buttons):not(.social-links), .hero-buttons > *, ' +
                     '.social-links > *, .hero-image, .space-motto, .scroll-indicator';
@@ -512,16 +560,15 @@
     }
 
     /* ---- geometry (measured lazily: resize, load and mode changes mark it dirty) ---- */
-    function standOnEarth() {
+    function parkByEarth() {
         var earth = hero ? hero.querySelector('.space-earth') : null;
         if (!earth) { return null; }
         var hr = hero.getBoundingClientRect();
         var er = earth.getBoundingClientRect();
         if (!er.width || !er.height) { return null; }
         /* everything relative to the hero panel, so a scrolled track does not matter */
-        var cx = er.left - hr.left + er.width / 2;
+        var right = er.right - hr.left;
         var cy = er.top - hr.top + er.height / 2;
-        var reach = er.width / 2 + ROCKET_H / 2; /* rim + half a rocket = the rocket's centre */
         var blocks = [];
         var els = hero.querySelectorAll(OBSTACLES);
         for (var i = 0; i < els.length; i++) {
@@ -530,23 +577,25 @@
                 blocks.push({ l: b.left - hr.left, t: b.top - hr.top, r: b.right - hr.left, b: b.bottom - hr.top });
             }
         }
+        /* the panel's edges count too (the flame's faint tip may leave at the bottom) */
+        blocks.push({ l: -1e4, t: -1e4, r: 0, b: 1e4 });
+        blocks.push({ l: -1e4, t: hr.height + 12, r: 1e4, b: 1e4 });
         var best = null;
         for (var k = 0; k < POSES.length; k++) {
-            var a = POSES[k];
-            var sin = Math.sin(a * Math.PI / 180);
-            var cos = Math.cos(a * Math.PI / 180);
-            var mx = cx + reach * sin;
-            var my = cy - reach * cos;
-            /* axis-aligned box of the rotated rocket (fins included) */
-            var hx = ((ROCKET_W + 2 * FIN) * Math.abs(cos) + ROCKET_H * Math.abs(sin)) / 2 + MARGIN;
-            var hy = ((ROCKET_W + 2 * FIN) * Math.abs(sin) + ROCKET_H * Math.abs(cos)) / 2 + MARGIN;
+            var x = right + POSES[k].dx;
+            var y = cy + POSES[k].dy;
+            /* box of the upright rocket, fins and idle flame included */
+            var l = x - FIN - MARGIN;
+            var r = x + ROCKET_W + FIN + MARGIN;
+            var t = y - MARGIN;
+            var bt = y + ROCKET_H + IDLE_FLAME + MARGIN;
             var overlap = 0;
             for (var j = 0; j < blocks.length; j++) {
-                overlap += Math.max(0, Math.min(mx + hx, blocks[j].r) - Math.max(mx - hx, blocks[j].l)) *
-                           Math.max(0, Math.min(my + hy, blocks[j].b) - Math.max(my - hy, blocks[j].t));
+                overlap += Math.max(0, Math.min(r, blocks[j].r) - Math.max(l, blocks[j].l)) *
+                           Math.max(0, Math.min(bt, blocks[j].b) - Math.max(t, blocks[j].t));
             }
             if (!best || overlap < best.overlap) {
-                best = { x: mx - ROCKET_W / 2, y: my - ROCKET_H / 2, a: a, overlap: overlap };
+                best = { x: x, y: y, a: 0, overlap: overlap };
             }
             if (!overlap) { break; }
         }
@@ -566,7 +615,7 @@
             if (r.height > 0) { cardTop = r.top; }
         }
         geo.laneY = (NAV_H + cardTop) / 2 - ROCKET_H / 2;
-        geo.stand = journey.mode === 'h' ? standOnEarth() : null;
+        geo.stand = journey.mode === 'h' ? parkByEarth() : null;
     }
 
     /* ---- choreography ---- */
@@ -615,9 +664,10 @@
         if (!mode) { return; }
         if (geo.dirty) { measure(); }
         var x, y, a;
+        var tucked = false;
         if (mode === 'h') {
             var stand = geo.stand;
-            /* the lane starts at 20vw, or straight above the standing spot when Earth's rim is further right */
+            /* the lane starts at 20vw, or straight above the parking spot when that is further right */
             var laneX = Math.max(LANE_START * geo.vw, stand ? stand.x : 0);
             if (stand && p <= LAUNCH_END) {
                 var e = easeOut(p / LAUNCH_END);
@@ -633,12 +683,15 @@
             x = 0;
             y = geo.vh * lerp(V_TOP, V_BOTTOM, p);
             a = 180;
+            tucked = p < V_HIDDEN_P; /* it launches out of the hero on the first scroll */
         }
         pilot.style.setProperty('--jr-x', x.toFixed(1) + 'px');
         pilot.style.setProperty('--jr-y', y.toFixed(1) + 'px');
         pilot.style.setProperty('--jr-a', a.toFixed(1) + 'deg');
         var grounded = mode === 'h' && p === 0;
+        if (grounded && (!geo.stand || geo.stand.overlap > 0)) { tucked = true; } /* no room to park */
         pilot.classList.toggle('is-grounded', grounded);
+        pilot.classList.toggle('is-tucked', tucked);
         setLaunching(mode === 'h' && p > 0 && p <= LAUNCH_END, grounded);
     }
 
@@ -796,7 +849,7 @@
             for (var k = 0; k < entries.length; k++) {
                 entries[k].target.classList.toggle('is-near', entries[k].isIntersecting);
             }
-        }, { root: journey.mode === 'h' ? document.getElementById('journey') : null, rootMargin: '100%' });
+        }, { root: journey.mode === 'h' ? document.getElementById('journey-track') : null, rootMargin: '100%' });
         for (var i = 0; i < planetPanels.length; i++) { observer.observe(planetPanels[i]); }
     }
 
@@ -824,7 +877,6 @@
 
     var root = document.documentElement;
     var NAV_H = 70;
-    var JOURNEY_MQ = '(min-width: 821px) and (min-height: 560px)';
     var REDUCED_MQ = '(prefers-reduced-motion: reduce)';
     var NAMES = { beyond: 'Footer' }; /* stops without a menu link */
 
@@ -863,9 +915,12 @@
             storage(function (ls) {
                 if (toJourney) { ls.removeItem('layout'); } else { ls.setItem('layout', 'list'); }
             });
+            /* the reloaded page lands on the URL's stop, not on the restored scroll offset */
+            try { history.scrollRestoration = 'manual'; } catch (e) { /* older browsers */ }
             location.reload();
         });
         controls.insertBefore(b, darkToggle && darkToggle.parentNode === controls ? darkToggle : controls.firstChild);
+        controls.classList.add('jn-has-toggle'); /* phones dock the two buttons beside the hamburger */
         return b;
     }
 
@@ -876,11 +931,12 @@
         started = true;
 
         var stops = journey.stops;
+        var track = document.getElementById('journey-track');
         var n = stops.length;
         var labels = [];
         var stopEls = [];
         var current = -1;
-        var byKeyboard = false; /* last input was a key (for the heading focus ring) */
+        var anchors = null; /* v: scroll offsets of the stops (measured lazily, see onProgress) */
 
         /* flight path */
         var path = document.createElement('div');
@@ -927,37 +983,40 @@
 
         /* the arrived stop's heading (the card's h2, the hero's h1, else the card
            itself) takes focus unless focus is already inside the panel — Tab
-           travelling into it must not be bounced back to the heading. The focus
-           ring only shows when the trip was driven from the keyboard */
+           travelling into it must not be bounced back to the heading. This is
+           programmatic focus for AT: it never draws a ring (Tab-driven focus keeps
+           the browser's own ring on the element that was tabbed to) */
         function focusHeading(stop) {
             var scope = stop.card || stop.el;
             var el = scope.querySelector('h1, h2, h3') || stop.card;
             if (!el || stop.el.contains(document.activeElement)) { return; }
             if (!el.hasAttribute('tabindex')) { el.setAttribute('tabindex', '-1'); }
             el.setAttribute('data-jn-focus', '');
-            el.classList.toggle('jn-ring', byKeyboard);
             try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
         }
-
-        function onKeyDown() { byKeyboard = true; }
-        function onPointer() { byKeyboard = false; }
 
         function onArrive(e) {
             var d = e.detail;
             setCurrent(d.index);
+            anchors = null;
             if (d.initial || !journey.active) { return; }
             live.textContent = 'Arrived at ' + labels[d.index] + ', ' + (d.index + 1) + ' of ' + n;
             if (journey.mode === 'h') { focusHeading(stops[d.index]); }
         }
 
-        /* Tab into a panel that is not on screen → fly there */
+        /* Tab into a panel that is not on screen → fly there. The browser has
+           already snapped the track onto that panel before focusin fires, so put
+           it back on the current stop first and let goTo animate the flight */
         function onFocusIn(e) {
             if (!journey.active || journey.mode !== 'h') { return; }
             var panel = closest(e.target, '.panel');
             if (!panel) { return; }
             for (var k = 0; k < n; k++) {
                 if (stops[k].el === panel) {
-                    if (k !== journey.index) { journey.goTo(k); }
+                    if (k !== journey.index) {
+                        if (track) { track.scrollLeft = journey.index * track.clientWidth; }
+                        journey.goTo(k);
+                    }
                     return;
                 }
             }
@@ -971,28 +1030,45 @@
             journey.goTo(stopEls.indexOf(a));
         }
 
-        /* h: the fill follows --journey-p (1/6 per stop). v: stops are not evenly
-           spaced in scroll space, so interpolate between the stops' tops so the
-           fill still ends on the current dot at rest */
-        function onProgress() {
-            if (journey.mode !== 'v') {
-                if (path.style.getPropertyValue('--jn-p')) { path.style.removeProperty('--jn-p'); }
-                return;
-            }
-            var y = window.pageYOffset;
+        /* h: the fill follows p (1/6 per stop). v: stops are not evenly spaced in
+           scroll space, so interpolate between the stops' tops so the fill still
+           ends on the current dot at rest. The tops are measured once per layout
+           change (resize, mode change, arrival, content growth), not per frame */
+        function measureAnchors() {
             var maxY = Math.max(1, Math.max(root.scrollHeight, document.body.scrollHeight) - window.innerHeight);
-            var last = n - 1;
-            var prev = 0;
-            var p = 1;
-            for (var k = 1; k <= last; k++) {
-                var anchor = k === last ? maxY : Math.min(maxY, stops[k].el.offsetTop - NAV_H);
-                if (y < anchor) {
-                    p = (k - 1 + (anchor > prev ? (y - prev) / (anchor - prev) : 1)) / last;
-                    break;
+            anchors = [];
+            for (var k = 1; k < n; k++) {
+                anchors.push(k === n - 1 ? maxY : Math.min(maxY, stops[k].el.offsetTop - NAV_H));
+            }
+        }
+
+        function invalidate() { anchors = null; }
+
+        function onProgress(e) {
+            var p;
+            if (journey.mode !== 'v') {
+                p = e && e.detail && typeof e.detail.p === 'number' ? e.detail.p : journey.progress();
+            } else {
+                if (!anchors) { measureAnchors(); }
+                var y = window.pageYOffset;
+                var last = n - 1;
+                var prev = 0;
+                p = 1;
+                for (var k = 1; k <= last; k++) {
+                    var anchor = anchors[k - 1];
+                    if (y < anchor) {
+                        p = (k - 1 + (anchor > prev ? (y - prev) / (anchor - prev) : 1)) / last;
+                        break;
+                    }
+                    prev = anchor;
                 }
-                prev = anchor;
             }
             path.style.setProperty('--jn-p', Math.max(0, Math.min(1, p)).toFixed(4));
+        }
+
+        function onModeChange(e) {
+            invalidate();
+            onProgress(e);
         }
 
         setCurrent(journey.index);
@@ -1000,29 +1076,38 @@
         path.addEventListener('click', onStopClick);
         document.addEventListener('journey:arrive', onArrive);
         document.addEventListener('journey:progress', onProgress);
-        document.addEventListener('journey:modechange', onProgress);
+        document.addEventListener('journey:modechange', onModeChange);
         document.addEventListener('focusin', onFocusIn);
-        window.addEventListener('keydown', onKeyDown, true);
-        window.addEventListener('pointerdown', onPointer, true);
-        window.addEventListener('wheel', onPointer, { capture: true, passive: true });
+        window.addEventListener('resize', invalidate);
+        window.addEventListener('load', invalidate);
+        if (window.ResizeObserver && track) { new ResizeObserver(invalidate).observe(track); }
     }
 
     /* ---- plain page: offer the way back for visitors who chose the list ---- */
     function initPlain() {
         if (!controls || storage(function (ls) { return ls.getItem('layout'); }) !== 'list') { return; }
-        var mqJourney = window.matchMedia(JOURNEY_MQ);
         var mqReduced = window.matchMedia(REDUCED_MQ);
         var btn = makeToggle(true);
-        function update() { btn.hidden = !mqJourney.matches || mqReduced.matches; }
+        /* both h and v are journeys, so only reduced motion hides the way back */
+        function update() { btn.hidden = mqReduced.matches; }
         update();
-        listen(mqJourney, update);
         listen(mqReduced, update);
+        /* the list view opened from the journey keeps its stop in the URL; land on it
+           when the browser did not (scroll restoration wins over the fragment on reload) */
+        window.addEventListener('load', function () {
+            var target = location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null;
+            if (target && !window.pageYOffset) {
+                var prev = root.style.scrollBehavior;
+                root.style.scrollBehavior = 'auto';
+                window.scrollTo(0, Math.max(0, target.offsetTop - NAV_H));
+                root.style.scrollBehavior = prev;
+            }
+        });
     }
 
     if (window.journey && window.journey.active) {
         initJourney();
     } else {
-        document.addEventListener('journey:ready', initJourney);
         initPlain();
     }
 })();
