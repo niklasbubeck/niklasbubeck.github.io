@@ -1124,6 +1124,49 @@
         uranus: RINGS_BACK + DISC + RINGS_FRONT,
         neptune: DISC + moon('triton')
     };
+    /* Pluto carries its heart — Tombaugh Regio, the nitrogen-ice plain — and
+       Charon, which is half its size, so the pair orbit a point outside Pluto
+       itself. It is small on purpose: at this stop, that is the point. */
+    var PLUTO = '<div class="jp-disc"><span class="jp-heart"></span></div>' + moon('charon');
+
+    /* The Kuiper belt as the near half of a ring: a scattered arc of icy rocks
+       below Pluto, seeded so it is the same belt on every repaint. */
+    function prng(seed) {
+        return function () {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+
+    function kuiper(count) {
+        var rnd = prng(0x4B1E5);
+        var html = '';
+        for (var i = 0; i < count; i++) {
+            var th = Math.PI * (i + rnd() * 0.7) / count;   /* 0..180deg: the near half */
+            var spread = 1 + (rnd() - 0.5) * 0.17;          /* a band, not a wire */
+            var x = 48 + 47 * Math.cos(th) * spread;
+            var y = 66 + 21 * Math.sin(th) * spread;
+            var w = 2 + Math.pow(rnd(), 2.2) * 7;
+            var h = w * (0.55 + rnd() * 0.5);
+            var fade = Math.sin(th);                        /* the ends of the arc trail off */
+            var a = (0.28 + rnd() * 0.55) * (0.4 + 0.6 * fade);
+            var tone = rnd();
+            var col = tone < 0.18 ? '196, 186, 206' : tone < 0.4 ? '208, 186, 164' : '198, 194, 188';
+            html += '<span class="jp-rock" style="left:' + x.toFixed(2) + '%;top:' + y.toFixed(2) +
+                '%;width:' + w.toFixed(1) + 'px;height:' + h.toFixed(1) +
+                'px;opacity:' + a.toFixed(2) +
+                ';background:rgb(' + col + ')' +
+                ';border-radius:' + (35 + rnd() * 30).toFixed(0) + '% ' + (40 + rnd() * 30).toFixed(0) + '% ' +
+                (35 + rnd() * 30).toFixed(0) + '% ' + (45 + rnd() * 30).toFixed(0) + '% / ' +
+                (40 + rnd() * 25).toFixed(0) + '% ' + (35 + rnd() * 30).toFixed(0) + '% ' +
+                (45 + rnd() * 25).toFixed(0) + '% ' + (40 + rnd() * 30).toFixed(0) + '%' +
+                ';transform:rotate(' + (rnd() * 180).toFixed(0) + 'deg)"></span>';
+        }
+        return '<div class="jp-kuiper">' + html + '</div>';
+    }
+
     var BEYOND = '<div class="jp-beyond">' +
         '<span class="jp-pale-dot"></span>' +
         '<p class="jp-caption">EARTH · 29 AU BEHIND YOU</p>' +
@@ -1152,6 +1195,14 @@
                 }
                 planetPanels.push(s.el);
             } else if (s.planet === 'beyond') {
+                if (!s.el.querySelector('.jp-planet')) {
+                    var far = document.createElement('div');
+                    far.className = 'jp-planet jp-pluto';
+                    far.setAttribute('aria-hidden', 'true');
+                    far.innerHTML = kuiper(96) + '<div class="jp-body">' + PLUTO + '</div>';
+                    s.el.insertBefore(far, s.el.firstChild);
+                }
+                planetPanels.push(s.el);
                 var decor = s.el.querySelector('.beyond-decor');
                 if (decor && !decor.firstElementChild) { decor.innerHTML = BEYOND; }
             }

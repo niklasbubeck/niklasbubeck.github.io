@@ -1351,6 +1351,114 @@ html.journey .jp-moon-triton {
 }
 
 /* ------------------------------------------------------------
+   Pluto and the Kuiper belt — the last stop. Small on purpose: at
+   29 AU the headline planet is a dwarf, and the belt it belongs to
+   is drawn as the near half of a ring of ice and rock.
+   ------------------------------------------------------------ */
+html.journey .jp-pluto {
+    --jp-size: 96px;
+    --jp-reach: 10px;
+    --jp-k: 0.5;
+    --jp-c: #C3A98C;
+}
+
+html.journey-h .jp-pluto .jp-body {
+    --jp-y: 63%;
+    --jp-r: 8%;
+}
+
+html.journey .jp-pluto .jp-disc {
+    --jp-period: 180px;
+    --jp-spin: 70s;
+    box-shadow:
+        inset -30px 0 rgba(0, 0, 0, 0.34),
+        0 0 0 12px rgba(195, 169, 140, 0.07),
+        0 0 0 24px rgba(195, 169, 140, 0.05),
+        0 0 46px rgba(195, 169, 140, var(--jp-glow));
+}
+
+/* mottled ice and rock, darker than the surrounding tan */
+html.journey .jp-pluto .jp-disc::before {
+    top: 14px;
+    left: 0;
+    width: 26px;
+    height: 9px;
+    border-radius: 9px;
+    background: #A2846A;
+    box-shadow:
+        44px 34px 0 -1px #A2846A,
+        86px 12px 0 -2px #B49075,
+        120px 52px 0 -1px #9C7C62,
+        156px 26px 0 -2px #A2846A,
+        180px 14px 0 0 #A2846A,
+        224px 34px 0 -1px #A2846A,
+        266px 12px 0 -2px #9C7C62,
+        300px 52px 0 -1px #A2846A;
+}
+
+/* Tombaugh Regio: the nitrogen-ice heart, softened so it reads as terrain */
+html.journey .jp-heart {
+    position: absolute;
+    left: 28px;
+    top: 48px;
+    width: 19px;
+    height: 19px;
+    background: #F1E6D4;
+    opacity: 0.7;
+    filter: blur(0.7px);
+    transform: rotate(-45deg);
+    z-index: 3;
+}
+
+html.journey .jp-heart::before,
+html.journey .jp-heart::after {
+    content: "";
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #F1E6D4;
+}
+
+html.journey .jp-heart::before {
+    top: -9.5px;
+    left: 0;
+}
+
+html.journey .jp-heart::after {
+    top: 0;
+    left: 9.5px;
+}
+
+/* Charon is half Pluto's size, so it swings wide and slowly */
+html.journey .jp-moon-charon {
+    color: #B5AEA6;
+    --jp-d: 12px;
+    --jp-rx: 74px;
+    --jp-ry: 30px;
+    --jp-tilt: -22deg;
+    --jp-t: 40s;
+}
+
+html.journey .jp-kuiper {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+html.journey .jp-rock {
+    position: absolute;
+    display: block;
+}
+
+/* on phones the panel is tall and narrow: pull the arc into the sky band */
+html.journey-v .jp-kuiper {
+    top: 0;
+    height: 190px;
+}
+
+/* ------------------------------------------------------------
    Pause everything unless the panel is near the viewport
    ------------------------------------------------------------ */
 html.journey .jp-planet,
