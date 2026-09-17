@@ -844,7 +844,10 @@
     var dockTimer = 0;
     var launchTimer = 0;
     var launchSince = 0;
-    var lastAngle = 0; /* keeps the nose from spinning the long way round */
+    var lastAngle = 0;    /* keeps the nose from spinning the long way round */
+    var heading = 1;      /* +1 outbound, -1 heading home */
+    var prevP = -1;       /* place() gets called with lastP already updated */
+    var turnRaf = 0;
     var resizeTimer = 0;
 
     /* ---- helpers ---- */
@@ -1041,6 +1044,9 @@
         if (geo.dirty) { measure(); }
         var x, y, a;
         var tucked = false;
+        /* which way are we actually going? scrolling back turns the ship round */
+        if (prevP >= 0 && Math.abs(p - prevP) > 0.0004) { heading = p > prevP ? 1 : -1; }
+        prevP = p;
         if (mode === 'h') {
             var pts = [];
             for (var k = 0; k < STOP_POSES.length; k++) { pts.push(poseAt(k)); }
@@ -1057,16 +1063,16 @@
             var dy = fwd.y - back.y;
             a = Math.hypot(dx, dy) < 0.05 ? lastAngle
                 : Math.atan2(dy, dx) * 180 / Math.PI + 90;
-            /* unwrap so a heading crossing +/-180 turns the short way round */
-            while (a - lastAngle > 180) { a -= 360; }
-            while (lastAngle - a > 180) { a += 360; }
-            /* it leaves the pad upright and rolls onto its heading as it climbs */
-            if (p < LAUNCH_END) { a = lerp(poseAt(0).a, a, ease(p / LAUNCH_END)); }
-            lastAngle = a;
+            /* the tangent always points up-trip, so flip it when flying home */
+            if (heading < 0) { a += 180; }
+            /* it leaves the pad upright and rolls onto its heading as it climbs —
+               and rolls back upright on the way down, however it arrives */
+            if (p < LAUNCH_END) { a = lerp(poseAt(0).a, shortOf(a, poseAt(0).a), ease(p / LAUNCH_END)); }
+            a = turnTowards(a);
         } else {
             x = 0;
             y = geo.vh * lerp(V_TOP, V_BOTTOM, p);
-            a = 180;
+            a = turnTowards(heading < 0 ? 0 : 180);  /* nose down going out, up coming back */
             tucked = p < V_HIDDEN_P; /* it launches out of the hero on the first scroll */
         }
         pilot.style.setProperty('--jr-x', x.toFixed(1) + 'px');
@@ -1077,6 +1083,32 @@
         pilot.classList.toggle('is-grounded', grounded);
         pilot.classList.toggle('is-tucked', tucked);
         setLaunching(mode === 'h' && p > 0 && p <= LAUNCH_END, grounded);
+    }
+
+    /* Bring `a` into the half-turn nearest `ref`, so no rotation takes the long
+       way round the dial. */
+    function shortOf(a, ref) {
+        while (a - ref > 180) { a -= 360; }
+        while (ref - a > 180) { a += 360; }
+        return a;
+    }
+
+    /* Ease onto the heading instead of snapping to it: a reversal is a 180
+       degree turn, and the ship should be seen to make it. Scrolling can stop
+       mid-turn, so this keeps its own frames coming until it has settled. */
+    function turnTowards(target) {
+        target = shortOf(target, lastAngle);
+        var d = target - lastAngle;
+        lastAngle += d * 0.2;
+        if (Math.abs(d) > 0.4) {
+            if (!turnRaf) {
+                turnRaf = requestAnimationFrame(function () {
+                    turnRaf = 0;
+                    if (journey.active) { place(lastP, journey.mode); }
+                });
+            }
+        }
+        return lastAngle;
     }
 
     /* ---- the pilot's call sign ---------------------------------------------
