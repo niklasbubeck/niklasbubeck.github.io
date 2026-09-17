@@ -57,6 +57,7 @@
     var arrivedIndex = -1;
     var initialIndex = indexOf(location.hash.slice(1)); /* stop named by the URL at load */
     var settleTimer = 0;
+    var travelling = false; /* the track is moving: cards drop their blur */
     var resizeTimer = 0;
     var rafId = 0;
     var lastPos = -1;
@@ -241,6 +242,8 @@
     function settle() {
         clearTimeout(settleTimer);
         settleTimer = 0;
+        travelling = false;
+        root.classList.remove('journey-travelling');
         if (!journey.active) { return; }
         /* the first arrive trusts the deep link: async content may still be shifting offsets */
         var i = arrivedIndex < 0 && initialIndex >= 0 ? initialIndex : indexFromPos();
@@ -282,6 +285,13 @@
 
     function onScroll() {
         if (!journey.active) { return; }
+        /* The glass cards drop their backdrop blur while the sky is moving: the
+           filter costs a compositing pass per frame (its radius does not matter)
+           and nobody reads a card mid-flight. settle() puts it back. */
+        if (!travelling) {
+            travelling = true;
+            root.classList.add('journey-travelling');
+        }
         kick();
         armSettle();
     }
@@ -492,9 +502,20 @@
     var ROCKET_W = 60;
     var ROCKET_H = 120;
     var FIN = 15;                 /* fins stick out 15px on each side of the body */
-    var LAUNCH_END = 0.15;        /* p at which the lift-off tween reaches the lane */
-    var LANE_START = 0.20;        /* vw */
-    var LANE_END = 0.64;          /* vw */
+    var LAUNCH_END = 0.15;        /* p over which the launch puffs burn */
+    /* One pose per stop, as fractions of the viewport, so the rocket wanders the
+       sky instead of sliding along a rail: it is somewhere different at every
+       planet and swings across the screen in between. Stop 0 is the parked pose
+       measured beside the hero Earth. */
+    var STOP_POSES = [
+        null,                            /* Earth: parked (measured) */
+        { x: 0.045, y: 0.20, a: 65 },    /* Mars: left gutter, high */
+        { x: 0.855, y: 0.62, a: 145 },   /* Jupiter: right, diving */
+        { x: 0.26, y: 0.09, a: 100 },    /* Saturn: the sky band, left of centre */
+        { x: 0.035, y: 0.58, a: 30 },    /* Uranus: left gutter, low, climbing */
+        { x: 0.80, y: 0.10, a: 118 },    /* Neptune: high on the right */
+        { x: 0.46, y: 0.74, a: 20 }      /* Beyond: under the last card, heading out */
+    ];
     var V_TOP = 0.18;             /* vh (vertical journey) */
     var V_BOTTOM = 0.62;          /* vh — ends beside the Beyond card, clear of the back-to-top button */
     var V_HIDDEN_P = 0.03;        /* v: the pilot only appears once the hero starts to scroll */
@@ -535,6 +556,22 @@
     function easeOut(t) {
         t = Math.max(0, Math.min(1, t));
         return 1 - Math.pow(1 - t, 3);
+    }
+
+    /* smootherstep: the rocket leaves and reaches each pose at rest */
+    function ease(t) {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+    }
+
+    /* A stop's pose in px. Stop 0 is the parked spot beside the Earth when it
+       could be measured; otherwise it falls back to the first travelling pose. */
+    function poseAt(i) {
+        var pose = STOP_POSES[Math.max(0, Math.min(STOP_POSES.length - 1, i))];
+        if (!pose) {
+            return geo.stand || { x: STOP_POSES[1].x * geo.vw, y: STOP_POSES[1].y * geo.vh, a: STOP_POSES[1].a };
+        }
+        return { x: pose.x * geo.vw, y: pose.y * geo.vh, a: pose.a };
     }
 
     function listen(mq, fn) {
@@ -666,19 +703,16 @@
         var x, y, a;
         var tucked = false;
         if (mode === 'h') {
-            var stand = geo.stand;
-            /* the lane starts at 20vw, or straight above the parking spot when that is further right */
-            var laneX = Math.max(LANE_START * geo.vw, stand ? stand.x : 0);
-            if (stand && p <= LAUNCH_END) {
-                var e = easeOut(p / LAUNCH_END);
-                x = lerp(stand.x, laneX, e);
-                y = lerp(stand.y, geo.laneY, e);
-                a = lerp(stand.a, 90, e);
-            } else {
-                x = lerp(laneX, LANE_END * geo.vw, Math.max(0, (p - LAUNCH_END) / (1 - LAUNCH_END)));
-                y = geo.laneY;
-                a = 90;
-            }
+            /* between the poses of the two stops either side of p */
+            var legs = Math.max(1, STOP_POSES.length - 1);
+            var t = Math.max(0, Math.min(legs, p * legs));
+            var i = Math.min(legs - 1, Math.floor(t));
+            var e = ease(t - i);
+            var from = poseAt(i);
+            var to = poseAt(i + 1);
+            x = lerp(from.x, to.x, e);
+            y = lerp(from.y, to.y, e);
+            a = lerp(from.a, to.a, e);
         } else {
             x = 0;
             y = geo.vh * lerp(V_TOP, V_BOTTOM, p);
@@ -934,33 +968,11 @@
         var track = document.getElementById('journey-track');
         var n = stops.length;
         var labels = [];
-        var stopEls = [];
-        var current = -1;
-        var anchors = null; /* v: scroll offsets of the stops (measured lazily, see onProgress) */
+        for (var i = 0; i < n; i++) { labels[i] = labelOf(stops[i]); }
 
-        /* flight path */
-        var path = document.createElement('div');
-        path.className = 'jn-path';
-        path.setAttribute('role', 'group');
-        path.setAttribute('aria-label', 'Flight path');
-        path.style.setProperty('--jn-n', String(Math.max(1, n - 1)));
-        var rail = document.createElement('div');
-        rail.className = 'jn-rail';
-        rail.innerHTML = '<span class="jn-line" aria-hidden="true"></span><span class="jn-fill" aria-hidden="true"></span>';
-        for (var i = 0; i < n; i++) {
-            labels[i] = labelOf(stops[i]);
-            var a = document.createElement('a');
-            a.className = 'jn-stop';
-            a.href = '#' + stops[i].id;
-            a.setAttribute('aria-label', labels[i]);
-            a.style.setProperty('--jn-i', String(i));
-            a.innerHTML = '<span class="jn-dot"></span><span class="jn-tip" aria-hidden="true"></span>';
-            a.lastChild.textContent = labels[i];
-            rail.appendChild(a);
-            stopEls.push(a);
-        }
-        path.appendChild(rail);
-        navbar.appendChild(path);
+        /* No progress rail: the navbar's own menu already says where you are.
+           This module keeps the arrival announcements, focus handling and the
+           list-view toggle. */
 
         /* live region */
         var live = document.createElement('div');
@@ -970,16 +982,6 @@
         document.body.appendChild(live);
 
         if (controls) { makeToggle(false); }
-
-        function setCurrent(i) {
-            if (i === current) { return; }
-            current = i;
-            for (var k = 0; k < n; k++) {
-                stopEls[k].classList.toggle('jn-passed', k < i);
-                if (k === i) { stopEls[k].setAttribute('aria-current', 'true'); }
-                else { stopEls[k].removeAttribute('aria-current'); }
-            }
-        }
 
         /* the arrived stop's heading (the card's h2, the hero's h1, else the card
            itself) takes focus unless focus is already inside the panel — Tab
@@ -997,8 +999,6 @@
 
         function onArrive(e) {
             var d = e.detail;
-            setCurrent(d.index);
-            anchors = null;
             if (d.initial || !journey.active) { return; }
             live.textContent = 'Arrived at ' + labels[d.index] + ', ' + (d.index + 1) + ' of ' + n;
             if (journey.mode === 'h') { focusHeading(stops[d.index]); }
@@ -1022,65 +1022,8 @@
             }
         }
 
-        function onStopClick(e) {
-            if (!journey.active || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) { return; }
-            var a = closest(e.target, '.jn-stop');
-            if (!a) { return; }
-            e.preventDefault();
-            journey.goTo(stopEls.indexOf(a));
-        }
-
-        /* h: the fill follows p (1/6 per stop). v: stops are not evenly spaced in
-           scroll space, so interpolate between the stops' tops so the fill still
-           ends on the current dot at rest. The tops are measured once per layout
-           change (resize, mode change, arrival, content growth), not per frame */
-        function measureAnchors() {
-            var maxY = Math.max(1, Math.max(root.scrollHeight, document.body.scrollHeight) - window.innerHeight);
-            anchors = [];
-            for (var k = 1; k < n; k++) {
-                anchors.push(k === n - 1 ? maxY : Math.min(maxY, stops[k].el.offsetTop - NAV_H));
-            }
-        }
-
-        function invalidate() { anchors = null; }
-
-        function onProgress(e) {
-            var p;
-            if (journey.mode !== 'v') {
-                p = e && e.detail && typeof e.detail.p === 'number' ? e.detail.p : journey.progress();
-            } else {
-                if (!anchors) { measureAnchors(); }
-                var y = window.pageYOffset;
-                var last = n - 1;
-                var prev = 0;
-                p = 1;
-                for (var k = 1; k <= last; k++) {
-                    var anchor = anchors[k - 1];
-                    if (y < anchor) {
-                        p = (k - 1 + (anchor > prev ? (y - prev) / (anchor - prev) : 1)) / last;
-                        break;
-                    }
-                    prev = anchor;
-                }
-            }
-            path.style.setProperty('--jn-p', Math.max(0, Math.min(1, p)).toFixed(4));
-        }
-
-        function onModeChange(e) {
-            invalidate();
-            onProgress(e);
-        }
-
-        setCurrent(journey.index);
-        onProgress();
-        path.addEventListener('click', onStopClick);
         document.addEventListener('journey:arrive', onArrive);
-        document.addEventListener('journey:progress', onProgress);
-        document.addEventListener('journey:modechange', onModeChange);
         document.addEventListener('focusin', onFocusIn);
-        window.addEventListener('resize', invalidate);
-        window.addEventListener('load', invalidate);
-        if (window.ResizeObserver && track) { new ResizeObserver(invalidate).observe(track); }
     }
 
     /* ---- plain page: offer the way back for visitors who chose the list ---- */
