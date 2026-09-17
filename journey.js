@@ -1038,6 +1038,49 @@
         setLaunching(mode === 'h' && p > 0 && p <= LAUNCH_END, grounded);
     }
 
+    /* ---- the pilot's call sign ---------------------------------------------
+       The rocket flies behind the glass with pointer-events off, so nothing can
+       hover it in the usual way. Instead the pointer's distance to its current
+       box is checked on a rAF tick, and the label is placed beside the nose.
+       Decorative and aria-hidden; it hides itself while the rocket is moving. */
+    var CALL_SIGN = 'ROCINANTE';
+    var sign = null;
+    var pointer = null;
+    var signRaf = 0;
+
+    function buildSign() {
+        sign = document.createElement('span');
+        sign.className = 'jr-callsign';
+        sign.setAttribute('aria-hidden', 'true');
+        sign.textContent = CALL_SIGN;
+        document.body.appendChild(sign);
+    }
+
+    function onPointer(e) {
+        pointer = { x: e.clientX, y: e.clientY };
+        if (!signRaf) { signRaf = requestAnimationFrame(checkSign); }
+    }
+
+    function checkSign() {
+        signRaf = 0;
+        if (!sign || !pointer || !journey.active || journey.mode !== 'h') { return; }
+        var r = pilot.getBoundingClientRect();
+        var pad = 14;
+        var near = pointer.x > r.left - pad && pointer.x < r.right + pad &&
+                   pointer.y > r.top - pad && pointer.y < r.bottom + pad;
+        if (near && !pilot.classList.contains('is-tucked')) {
+            sign.style.left = Math.round(r.left + r.width / 2) + 'px';
+            sign.style.top = Math.round(r.bottom + 10) + 'px';
+            sign.classList.add('is-shown');
+        } else {
+            sign.classList.remove('is-shown');
+        }
+    }
+
+    function hideSign() {
+        if (sign) { sign.classList.remove('is-shown'); }
+    }
+
     function applyLabel(mode) {
         if (!backToTop) { return; }
         if (mode === 'h') {
@@ -1057,6 +1100,7 @@
 
     /* ---- events ---- */
     function onProgress(e) {
+        if (e && e.detail && e.detail.v > 0.4) { hideSign(); }
         if (!journey.active) { return; }
         var d = e.detail;
         lastP = d.p;
@@ -1096,6 +1140,8 @@
     document.addEventListener('journey:progress', onProgress);
     document.addEventListener('journey:modechange', onModeChange);
     window.addEventListener('resize', onResize);
+    buildSign();
+    window.addEventListener('pointermove', onPointer, { passive: true });
     window.addEventListener('load', replace);
     listen(mqReduced, onReducedChange);
 })();
@@ -1164,7 +1210,10 @@
                 (45 + rnd() * 25).toFixed(0) + '% ' + (40 + rnd() * 30).toFixed(0) + '%' +
                 ';transform:rotate(' + (rnd() * 180).toFixed(0) + 'deg)"></span>';
         }
-        return '<div class="jp-kuiper">' + html + '</div>';
+        /* one rock is not a rock: the OPA's split circle, turning very slowly */
+        html += '<span class="jp-opa"></span>';
+        return '<button type="button" class="jp-belt-hit" tabindex="-1" aria-hidden="true"></button>' +
+               '<div class="jp-kuiper">' + html + '</div>';
     }
 
     var BEYOND = '<div class="jp-beyond">' +
@@ -1205,8 +1254,34 @@
                 planetPanels.push(s.el);
                 var decor = s.el.querySelector('.beyond-decor');
                 if (decor && !decor.firstElementChild) { decor.innerHTML = BEYOND; }
+                bindBelt();
             }
         }
+    }
+
+    /* ---- Oye, beltalowda ---------------------------------------------------
+       The Kuiper belt is the one place on the trip where a Belter joke is
+       astronomically correct, so clicking it flips the last stop's captions
+       into Creole and brings the rocks up. Decorative throughout: the whole
+       block is aria-hidden, so nothing reaches a crawler or a screen reader. */
+    var BELTER = {
+        '.jp-caption': ['EARTH · 29 AU BEHIND YOU', 'OYE, BELTALOWDA!'],
+        '.jp-motto': ['STILL REACHING', 'STILL REACHING · SASA KE?']
+    };
+
+    function bindBelt() {
+        var hit = document.querySelector('#beyond .jp-belt-hit');
+        if (!hit || hit.getAttribute('data-bound')) { return; }
+        hit.setAttribute('data-bound', '1');
+        hit.addEventListener('click', function () {
+            var belt = document.querySelector('#beyond .jp-kuiper');
+            var on = belt && belt.classList.toggle('is-belter');
+            for (var sel in BELTER) {
+                if (!BELTER.hasOwnProperty(sel)) { continue; }
+                var el = document.querySelector('#beyond ' + sel);
+                if (el) { el.textContent = BELTER[sel][on ? 1 : 0]; }
+            }
+        });
     }
 
     /* ---- Galilean dot per research card; hover lights the orbit moon ---- */

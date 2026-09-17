@@ -583,6 +583,34 @@ html.journey .jr-pilot {
 
 /* Out of sight: parked with no room beside the Earth (short h viewports), or
    waiting in the hero before the first scroll (v) */
+/* The pilot's call sign, shown when the pointer finds the ship */
+.jr-callsign {
+    display: none;
+}
+
+html.journey-h .jr-callsign {
+    display: block;
+    position: fixed;
+    z-index: 901;
+    transform: translateX(-50%);
+    padding: 2px 7px;
+    border: 1px solid rgba(237, 230, 216, 0.22);
+    border-radius: 3px;
+    background: rgba(14, 14, 18, 0.72);
+    color: #E4DACA;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+html.journey-h .jr-callsign.is-shown {
+    opacity: 1;
+}
+
 html.journey .jr-pilot.is-tucked {
     opacity: 0;
 }
@@ -1450,6 +1478,94 @@ html.journey .jp-kuiper {
 html.journey .jp-rock {
     position: absolute;
     display: block;
+}
+
+/* The belt answers to a click: a band along the arc, cursor-hinted, that
+   flips the last stop into Belter Creole and brings the ice up. */
+html.journey .jp-belt-hit {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 56%;
+    bottom: 1%;
+    z-index: 1;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    pointer-events: auto;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+html.journey .jp-belt-hit:focus {
+    outline: none;
+}
+
+html.journey .jp-kuiper {
+    transition: filter 0.35s ease;
+}
+
+html.journey .jp-belt-hit:hover ~ .jp-kuiper {
+    filter: brightness(1.3);
+}
+
+html.journey .jp-kuiper.is-belter {
+    filter: brightness(1.75) saturate(1.15);
+}
+
+html.journey .jp-belt-hit:hover ~ .jp-kuiper.is-belter {
+    filter: brightness(2) saturate(1.15);
+}
+
+/* One rock is the OPA's split circle. It turns once every two minutes, so you
+   only notice it if you were already looking. */
+html.journey .jp-opa {
+    position: absolute;
+    left: 26%;
+    top: 84%;
+    width: 17px;
+    height: 17px;
+    margin: -8.5px 0 0 -8.5px;
+    opacity: 0.55;
+    color: #D6C3A4;
+    animation: jpOpaTurn 120s linear infinite;
+}
+
+html.journey .jp-opa::before,
+html.journey .jp-opa::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 17px;
+    height: 8.5px;
+    border: 1.4px solid currentColor;
+}
+
+html.journey .jp-opa::before {
+    top: 0;
+    border-bottom: 0;
+    border-radius: 17px 17px 0 0;
+    transform: translate(2px, -1px);
+}
+
+html.journey .jp-opa::after {
+    bottom: 0;
+    border-top: 0;
+    border-radius: 0 0 17px 17px;
+    transform: translate(-2px, 1px);
+}
+
+@keyframes jpOpaTurn {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* on phones the arc lives in the band above the card, so the hit band follows */
+html.journey-v .jp-belt-hit {
+    top: 0;
+    bottom: auto;
+    height: 190px;
 }
 
 /* on phones the panel is tall and narrow: pull the arc into the sky band */
