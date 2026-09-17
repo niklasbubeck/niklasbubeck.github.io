@@ -629,14 +629,20 @@
        sky instead of sliding along a rail: it is somewhere different at every
        planet and swings across the screen in between. Stop 0 is the parked pose
        measured beside the hero Earth. */
+    /* The waypoints sit on an arc rather than being scattered freely: a path
+       that doubles back turns through 100 degrees at the hairpin however well
+       you spline it. Sweeping from beside the Earth up and over to the left
+       keeps every turn gentle while still putting each planet's rocket in a
+       clearly different place. `a` is the parked angle only — in flight the
+       nose follows the path. */
     var STOP_POSES = [
-        null,                            /* Earth: parked (measured) */
-        { x: 0.075, y: 0.20, a: 65 },    /* Mars: left gutter, high */
-        { x: 0.855, y: 0.62, a: 145 },   /* Jupiter: right, diving */
-        { x: 0.26, y: 0.09, a: 100 },    /* Saturn: the sky band, left of centre */
-        { x: 0.065, y: 0.58, a: 30 },    /* Uranus: left gutter, low, climbing */
-        { x: 0.80, y: 0.10, a: 118 },    /* Neptune: high on the right */
-        { x: 0.46, y: 0.74, a: 20 }      /* Beyond: under the last card, heading out */
+        null,                             /* Earth: parked (measured) */
+        { x: 0.573, y: 0.774, a: 65 },    /* Mars */
+        { x: 0.787, y: 0.666, a: 65 },    /* Jupiter */
+        { x: 0.879, y: 0.467, a: 65 },    /* Saturn */
+        { x: 0.811, y: 0.261, a: 65 },    /* Uranus */
+        { x: 0.611, y: 0.134, a: 65 },    /* Neptune */
+        { x: 0.364, y: 0.142, a: 65 }     /* Beyond */
     ];
     var V_TOP = 0.18;             /* vh (vertical journey) */
     var V_BOTTOM = 0.62;          /* vh — ends beside the Beyond card, clear of the back-to-top button */
@@ -668,6 +674,7 @@
     var dockTimer = 0;
     var launchTimer = 0;
     var launchSince = 0;
+    var lastAngle = 0; /* keeps the nose from spinning the long way round */
     var resizeTimer = 0;
 
     /* ---- helpers ---- */
@@ -675,15 +682,55 @@
         return a + (b - a) * t;
     }
 
-    function easeOut(t) {
-        t = Math.max(0, Math.min(1, t));
-        return 1 - Math.pow(1 - t, 3);
-    }
-
     /* smootherstep: the rocket leaves and reaches each pose at rest */
     function ease(t) {
         t = Math.max(0, Math.min(1, t));
         return t * t * (3 - 2 * t);
+    }
+
+    /* ---- the flight path -------------------------------------------------
+       The stop poses are waypoints, not corners: the rocket follows a
+       cubic Hermite spline through them, so it banks through each planet
+       instead of turning on the spot. The nose follows the tangent, so it
+       always flies forwards. */
+
+    var PATH_TENSION = 0.42;   /* 0.5 is plain Catmull-Rom; lower keeps the arcs tighter */
+
+    /* Cubic Hermite with shared tangents at the knots. Catmull-Rom's centripetal
+       form is smoother as a shape, but it is only C1 in its own knot spacing —
+       driven by scroll position it kinks by ~95 degrees as it crosses a waypoint.
+       Sharing one tangent per waypoint makes the curve C1 in the parameter we
+       actually drive, so the rocket banks through each planet continuously. */
+    function tangentAt(pts, i) {
+        var prev = pts[Math.max(0, i - 1)];
+        var next = pts[Math.min(pts.length - 1, i + 1)];
+        var k = (i === 0 || i === pts.length - 1) ? 1 : PATH_TENSION;
+        return { x: (next.x - prev.x) * k, y: (next.y - prev.y) * k };
+    }
+
+    function crAt(pts, i, u) {
+        var p1 = pts[i];
+        var p2 = pts[Math.min(pts.length - 1, i + 1)];
+        var m1 = tangentAt(pts, i);
+        var m2 = tangentAt(pts, Math.min(pts.length - 1, i + 1));
+        var u2 = u * u;
+        var u3 = u2 * u;
+        var h00 = 2 * u3 - 3 * u2 + 1;
+        var h10 = u3 - 2 * u2 + u;
+        var h01 = -2 * u3 + 3 * u2;
+        var h11 = u3 - u2;
+        return {
+            x: h00 * p1.x + h10 * m1.x + h01 * p2.x + h11 * m2.x,
+            y: h00 * p1.y + h10 * m1.y + h01 * p2.y + h11 * m2.y
+        };
+    }
+
+    /* s runs 0..legs across the whole trip */
+    function pathAt(pts, s) {
+        var legs = pts.length - 1;
+        s = Math.max(0, Math.min(legs, s));
+        var i = Math.min(legs - 1, Math.floor(s));
+        return crAt(pts, i, s - i);
     }
 
     /* A stop's pose in px. Stop 0 is the parked spot beside the Earth when it
@@ -825,16 +872,27 @@
         var x, y, a;
         var tucked = false;
         if (mode === 'h') {
-            /* between the poses of the two stops either side of p */
-            var legs = Math.max(1, STOP_POSES.length - 1);
-            var t = Math.max(0, Math.min(legs, p * legs));
-            var i = Math.min(legs - 1, Math.floor(t));
-            var e = ease(t - i);
-            var from = poseAt(i);
-            var to = poseAt(i + 1);
-            x = lerp(from.x, to.x, e);
-            y = lerp(from.y, to.y, e);
-            a = lerp(from.a, to.a, e);
+            var pts = [];
+            for (var k = 0; k < STOP_POSES.length; k++) { pts.push(poseAt(k)); }
+            var legs = Math.max(1, pts.length - 1);
+            var s = Math.max(0, Math.min(legs, p * legs));
+            var at = pathAt(pts, s);
+            x = at.x;
+            y = at.y;
+            /* nose along the path: sample a little either side and take the heading */
+            var step = 0.015;
+            var back = pathAt(pts, s - step);
+            var fwd = pathAt(pts, s + step);
+            var dx = fwd.x - back.x;
+            var dy = fwd.y - back.y;
+            a = Math.hypot(dx, dy) < 0.05 ? lastAngle
+                : Math.atan2(dy, dx) * 180 / Math.PI + 90;
+            /* unwrap so a heading crossing +/-180 turns the short way round */
+            while (a - lastAngle > 180) { a -= 360; }
+            while (lastAngle - a > 180) { a += 360; }
+            /* it leaves the pad upright and rolls onto its heading as it climbs */
+            if (p < LAUNCH_END) { a = lerp(poseAt(0).a, a, ease(p / LAUNCH_END)); }
+            lastAngle = a;
         } else {
             x = 0;
             y = geo.vh * lerp(V_TOP, V_BOTTOM, p);
