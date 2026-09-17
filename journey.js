@@ -1212,7 +1212,7 @@
         }
         /* one rock is not a rock: the OPA's split circle, turning very slowly */
         html += '<span class="jp-opa"></span>';
-        return '<button type="button" class="jp-belt-hit" tabindex="-1" aria-hidden="true"></button>' +
+        return '<div class="jp-belt-hit" aria-hidden="true"></div>' +
                '<div class="jp-kuiper">' + html + '</div>';
     }
 
@@ -1269,18 +1269,35 @@
         '.jp-motto': ['STILL REACHING', 'STILL REACHING · SASA KE?']
     };
 
+    function speakBelter(on) {
+        var belt = document.querySelector('#beyond .jp-kuiper');
+        if (belt) { belt.classList.toggle('is-belter', on); }
+        for (var sel in BELTER) {
+            if (!BELTER.hasOwnProperty(sel)) { continue; }
+            var el = document.querySelector('#beyond ' + sel);
+            if (el) { el.textContent = BELTER[sel][on ? 1 : 0]; }
+        }
+    }
+
     function bindBelt() {
         var hit = document.querySelector('#beyond .jp-belt-hit');
         if (!hit || hit.getAttribute('data-bound')) { return; }
         hit.setAttribute('data-bound', '1');
+        /* A pointer that can hover just sweeps over the belt; a finger taps it.
+           Keyed off the pointer's own type rather than a (hover: hover) query,
+           which some browsers answer wrongly for a plain mouse. */
+        var kind = 'mouse';
+        hit.addEventListener('pointerenter', function (e) {
+            kind = e.pointerType || 'mouse';
+            if (kind !== 'touch') { speakBelter(true); }
+        });
+        hit.addEventListener('pointerleave', function (e) {
+            if ((e.pointerType || 'mouse') !== 'touch') { speakBelter(false); }
+        });
         hit.addEventListener('click', function () {
+            if (kind !== 'touch') { return; }
             var belt = document.querySelector('#beyond .jp-kuiper');
-            var on = belt && belt.classList.toggle('is-belter');
-            for (var sel in BELTER) {
-                if (!BELTER.hasOwnProperty(sel)) { continue; }
-                var el = document.querySelector('#beyond ' + sel);
-                if (el) { el.textContent = BELTER[sel][on ? 1 : 0]; }
-            }
+            speakBelter(!(belt && belt.classList.contains('is-belter')));
         });
     }
 

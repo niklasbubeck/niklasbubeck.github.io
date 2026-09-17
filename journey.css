@@ -1480,8 +1480,9 @@ html.journey .jp-rock {
     display: block;
 }
 
-/* The belt answers to a click: a band along the arc, cursor-hinted, that
-   flips the last stop into Belter Creole and brings the ice up. */
+/* The belt answers to the pointer simply being there: a band along the arc
+   that brings the ice up and turns the last stop over to Belter Creole. No
+   click, no cursor change — you find it by sweeping across the belt. */
 html.journey .jp-belt-hit {
     position: absolute;
     left: 0;
@@ -1489,17 +1490,7 @@ html.journey .jp-belt-hit {
     top: 56%;
     bottom: 1%;
     z-index: 1;
-    padding: 0;
-    border: 0;
-    background: transparent;
     pointer-events: auto;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-html.journey .jp-belt-hit:focus {
-    outline: none;
 }
 
 html.journey .jp-kuiper {
