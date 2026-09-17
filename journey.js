@@ -130,8 +130,138 @@
         sky = document.createElement('div');
         sky.className = 'journey-sky';
         sky.setAttribute('aria-hidden', 'true');
-        sky.innerHTML = '<div class="journey-sky-base"></div><div class="journey-sky-far"></div><div class="journey-sky-near"></div>';
+        sky.innerHTML = '<div class="journey-sky-base"></div>' +
+                        '<div class="journey-sky-far"><canvas class="journey-stars"></canvas></div>' +
+                        '<div class="journey-sky-near"><canvas class="journey-stars"></canvas></div>';
         document.body.insertBefore(sky, document.body.firstChild);
+        paintSky();
+    }
+
+    /* ---- the starfield ----------------------------------------------------
+       Painted once into two canvases instead of tiling a five-dot gradient:
+       the old sky repeated its ten stars about 150 times per screen in two
+       square grids, which is what made it read as wallpaper. Each layer is
+       wider (taller, on phones) than the viewport by its parallax range, so
+       travelling uncovers sky you have not seen rather than resliding the
+       same stars. Seeded, so a resize repaints the same sky.             */
+
+    function rng(seed) {
+        return function () {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+
+    /* far: many small dim stars, moves least. near: fewer, bigger, brighter. */
+    var SKY_LAYERS = [
+        { sel: '.journey-sky-far', seed: 0x51AB3, over: 0.34, per: 2600, rMin: 0.32, rMax: 1.05, aMin: 0.16, aMax: 0.62 },
+        { sel: '.journey-sky-near', seed: 0xB0A7E, over: 0.70, per: 6200, rMin: 0.45, rMax: 1.70, aMin: 0.35, aMax: 1.00 }
+    ];
+
+    function paintSky() {
+        if (!sky) { return; }
+        var horizontal = mode === 'h';
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        for (var i = 0; i < SKY_LAYERS.length; i++) {
+            var spec = SKY_LAYERS[i];
+            var layer = sky.querySelector(spec.sel);
+            var canvas = layer ? layer.firstElementChild : null;
+            if (!canvas || !canvas.getContext) { continue; }
+            /* the layer overhangs the viewport along the direction of travel */
+            var w = Math.ceil(horizontal ? vw * (1 + spec.over) : vw);
+            var h = Math.ceil(horizontal ? vh : vh * (1 + spec.over * 0.5));
+            layer.style.width = w + 'px';
+            layer.style.height = h + 'px';
+            layer.style.setProperty('--sky-shift', -(horizontal ? w - vw : h - vh) + 'px');
+            paintField(canvas, w, h, spec, horizontal);
+        }
+        seedTwinkles();
+    }
+
+    /* Eight stars that breathe. Anything more and the page never idles; this
+       is cheap (opacity only) and it keeps the sky from looking like a print. */
+    function seedTwinkles() {
+        var near = sky.querySelector('.journey-sky-near');
+        if (!near) { return; }
+        var old = near.querySelectorAll('.journey-twinkle');
+        for (var k = 0; k < old.length; k++) { old[k].remove(); }
+        var rnd = rng(0x7C1A9);
+        for (var i = 0; i < 8; i++) {
+            var dot = document.createElement('span');
+            dot.className = 'journey-twinkle';
+            dot.style.left = (rnd() * 96 + 2).toFixed(2) + '%';
+            dot.style.top = (rnd() * 92 + 4).toFixed(2) + '%';
+            dot.style.animationDuration = (4.5 + rnd() * 5).toFixed(1) + 's';
+            dot.style.animationDelay = (-rnd() * 8).toFixed(1) + 's';
+            near.appendChild(dot);
+        }
+    }
+
+    function paintField(canvas, w, h, spec, horizontal) {
+        var ctx = canvas.getContext('2d');
+        canvas.width = w;
+        canvas.height = h;
+        var rnd = rng(spec.seed);
+
+        /* a soft galactic band on a slow diagonal, so the field has structure
+           the eye can read as depth instead of uniform noise */
+        var bandAt = function (x) { return h * (0.28 + 0.34 * (x / w)); };
+        var sigma = h * 0.17;
+        ctx.globalCompositeOperation = 'lighter';
+        for (var k = 0; k < 9; k++) {
+            var bx = (k + 0.5) / 9 * w;
+            var by = bandAt(bx) + (rnd() - 0.5) * h * 0.1;
+            var rad = h * (0.30 + rnd() * 0.22);
+            var g = ctx.createRadialGradient(bx, by, 0, bx, by, rad);
+            g.addColorStop(0, 'rgba(152, 170, 214, 0.045)');
+            g.addColorStop(1, 'rgba(152, 170, 214, 0)');
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.scale(1.9, 0.55);
+            ctx.translate(-bx, -by);
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(bx, by, rad, 0, 6.2832);
+            ctx.fill();
+            ctx.restore();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+
+        var count = Math.round(w * h / spec.per);
+        for (var n = 0; n < count; n++) {
+            var x = rnd() * w;
+            var y = rnd() * h;
+            /* thinning out as the trip leaves the inner system behind */
+            var t = horizontal ? x / w : y / h;
+            var band = Math.exp(-Math.pow((y - bandAt(x)) / sigma, 2));
+            if (rnd() > (1 - 0.45 * t) * (0.5 + 0.7 * band)) { continue; }
+
+            var u = rnd();
+            var r = spec.rMin + Math.pow(u, 3) * (spec.rMax - spec.rMin);
+            var a = spec.aMin + rnd() * (spec.aMax - spec.aMin);
+            var c = rnd();
+            var col = c < 0.07 ? '255, 214, 170' : c < 0.13 ? '188, 212, 255' : '255, 251, 244';
+
+            if (u > 0.988) { /* the handful of bright ones carry a small halo */
+                var hr = r * 6;
+                var hg = ctx.createRadialGradient(x, y, 0, x, y, hr);
+                hg.addColorStop(0, 'rgba(' + col + ', ' + (a * 0.32).toFixed(3) + ')');
+                hg.addColorStop(1, 'rgba(' + col + ', 0)');
+                ctx.fillStyle = hg;
+                ctx.beginPath();
+                ctx.arc(x, y, hr, 0, 6.2832);
+                ctx.fill();
+                r *= 1.5;
+                a = Math.min(1, a * 1.3);
+            }
+            ctx.fillStyle = 'rgba(' + col + ', ' + a.toFixed(3) + ')';
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, 6.2832);
+            ctx.fill();
+        }
     }
 
     function injectMore() {
@@ -384,6 +514,7 @@
             if (!journey.active) { return; }
             if (mode === 'h') { goTo(journey.index, { behavior: 'auto' }); }
             updateHasMore();
+            paintSky();
         }, 120);
     }
 
@@ -399,6 +530,7 @@
             goTo(journey.index, { behavior: 'auto' });
             updateHasMore();
             kick();
+            paintSky();
             emit('journey:modechange', { mode: next });
         });
     }
