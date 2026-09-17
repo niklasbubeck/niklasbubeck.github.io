@@ -509,10 +509,10 @@
        measured beside the hero Earth. */
     var STOP_POSES = [
         null,                            /* Earth: parked (measured) */
-        { x: 0.045, y: 0.20, a: 65 },    /* Mars: left gutter, high */
+        { x: 0.075, y: 0.20, a: 65 },    /* Mars: left gutter, high */
         { x: 0.855, y: 0.62, a: 145 },   /* Jupiter: right, diving */
         { x: 0.26, y: 0.09, a: 100 },    /* Saturn: the sky band, left of centre */
-        { x: 0.035, y: 0.58, a: 30 },    /* Uranus: left gutter, low, climbing */
+        { x: 0.065, y: 0.58, a: 30 },    /* Uranus: left gutter, low, climbing */
         { x: 0.80, y: 0.10, a: 118 },    /* Neptune: high on the right */
         { x: 0.46, y: 0.74, a: 20 }      /* Beyond: under the last card, heading out */
     ];

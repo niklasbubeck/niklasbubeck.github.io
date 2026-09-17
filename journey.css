@@ -9,6 +9,7 @@
 html.journey {
     --nav-h: 70px;
     --sky-band: clamp(88px, 12vh, 120px);
+    --card-gap-b: 3vh; /* breathing room under the card */
     --sky-band-v: 96px;
     --card-w: min(1120px, calc(100vw - 64px));
 
@@ -263,7 +264,7 @@ html.journey-h .panel-card {
     right: 0;
     margin: 0 auto; /* centred by layout, not a transform: no half-pixel blur on odd widths */
     width: var(--card-w);
-    max-height: calc(100% - var(--nav-h) - var(--sky-band) - 3vh);
+    max-height: calc(100% - var(--nav-h) - var(--sky-band) - var(--card-gap-b));
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
@@ -288,6 +289,104 @@ html.journey-h .panel-card .section-header {
 /* The publications card is the tallest: a tighter header keeps its dots in view at 900px */
 html.journey-h .publications .section-header {
     margin-bottom: 1.5rem;
+}
+
+/* ------------------------------------------------------------
+   Research, compacted so all four areas fit one screen without
+   the card scrolling: the sketch shrinks from a banner into a mark
+   beside its heading, and the paragraph runs the card's full width.
+   Only in the horizontal journey — the plain page and phones keep
+   the roomy banner layout.
+   ------------------------------------------------------------ */
+html.journey-h .research .section-header {
+    margin-bottom: 1.1rem;
+}
+
+/* the research card carries the most content: give it back its margins */
+html.journey-h .research .panel-card {
+    padding-top: 1.6rem;
+}
+
+html.journey-h .research .panel-card > .container {
+    padding-bottom: 1.6rem;
+}
+
+html.journey-h .research .section-title {
+    font-size: 2rem;
+}
+
+html.journey-h .research .section-subtitle {
+    font-size: 0.95rem;
+}
+
+html.journey-h .research-grid {
+    gap: 1rem;
+}
+
+html.journey-h .research-card {
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.85rem;
+    padding: 0.8rem 1rem 0.85rem;
+}
+
+html.journey-h .research-card .rc-header {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 0;
+    padding: 0;
+    border-bottom: 0;
+}
+
+html.journey-h .research-card .research-sketch {
+    max-width: 78px;
+}
+
+html.journey-h .research-card h3 {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0;
+    font-size: 1.15rem;
+}
+
+html.journey-h .research-card p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: 0.6rem 0 0;
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+html.journey-h .research-card .research-tags {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    padding: 0.45rem 0 0;
+    font-size: 0.78rem;
+}
+
+/* Short screens: a shallower sky band and no section subtitle buy the
+   research grid the last ~60px it needs to stay on one screen */
+@media (max-height: 820px) {
+    html.journey-h {
+        --sky-band: clamp(72px, 10vh, 100px);
+        --card-gap-b: 2vh;
+    }
+}
+
+@media (max-height: 760px) {
+    html.journey-h .research .section-subtitle {
+        display: none;
+    }
+
+    html.journey-h .research .section-title {
+        font-size: 1.85rem;
+    }
+}
+
+/* the cardiac card's ECG wash was sized for the banner */
+html.journey-h .rc-header-cardiac .cardiac-ecg-bg {
+    display: none;
 }
 
 /* "More below" hint (JS-injected last child, toggled via .has-more): the fade
