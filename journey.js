@@ -1281,6 +1281,38 @@
         '<ellipse cx="74" cy="40" rx="20" ry="3" fill="#FFFFFF" opacity="0.13"/>' +
         '</svg></div>';
 
+    /* James Webb, parked in the lower left of Research: eighteen gold segments
+       over the five-layer sunshield, looking the other way. */
+    var WEBB = '<div class="jp-webb" aria-hidden="true">' +
+        '<svg viewBox="0 0 192 168" width="192" height="168" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+        '<linearGradient id="jwShield" x1="0" y1="0" x2="0.4" y2="1">' +
+        '<stop offset="0" stop-color="#A7B0C6"/><stop offset="0.5" stop-color="#69728A"/>' +
+        '<stop offset="1" stop-color="#3C4357"/></linearGradient>' +
+        '<linearGradient id="jwGold" x1="0" y1="0" x2="0.6" y2="1">' +
+        '<stop offset="0" stop-color="#F0C85A"/><stop offset="0.55" stop-color="#C79A2C"/>' +
+        '<stop offset="1" stop-color="#8C6A1B"/></linearGradient>' +
+        '</defs>' +
+        /* five-layer sunshield, the kite it always flies behind */
+        '<g opacity="0.9">' +
+        '<path d="M 96 96 L 186 130 L 96 164 L 6 130 Z" fill="url(#jwShield)"/>' +
+        '<path d="M 96 101 L 172 130 L 96 158 L 20 130 Z" fill="none" stroke="#C3CBDC" stroke-opacity="0.35" stroke-width="0.9"/>' +
+        '<path d="M 96 108 L 156 130 L 96 151 L 36 130 Z" fill="none" stroke="#C3CBDC" stroke-opacity="0.28" stroke-width="0.9"/>' +
+        '<path d="M 96 115 L 139 130 L 96 145 L 53 130 Z" fill="none" stroke="#C3CBDC" stroke-opacity="0.22" stroke-width="0.9"/>' +
+        '</g>' +
+        /* the boom out to the secondary */
+        '<g stroke="#7E879B" stroke-width="1.4" fill="none">' +
+        '<path d="M 70 34 L 96 6 L 122 34"/><path d="M 96 52 L 96 6"/>' +
+        '</g>' +
+        '<circle cx="96" cy="6" r="5.2" fill="#B9A46A" stroke="#6E6244" stroke-width="0.8"/>' +
+        /* eighteen gold segments: an empty centre, a ring of six, a ring of twelve */
+        '<g fill="url(#jwGold)" stroke="#6B5417" stroke-width="0.6">' +
+        '<polygon points="86.8,58.1 95.4,63.0 95.4,72.8 86.8,77.8 78.3,72.8 78.3,63.0"/><polygon points="105.2,58.1 113.7,63.0 113.7,72.8 105.2,77.8 96.6,72.8 96.6,63.0"/><polygon points="114.4,42.1 122.9,47.1 122.9,56.9 114.4,61.9 105.8,56.9 105.8,47.1"/><polygon points="105.2,26.2 113.7,31.2 113.7,41.0 105.2,46.0 96.6,41.0 96.6,31.2"/><polygon points="86.8,26.2 95.4,31.2 95.4,41.0 86.8,46.0 78.3,41.0 78.3,31.2"/><polygon points="77.6,42.1 86.2,47.1 86.2,56.9 77.6,61.9 69.1,56.9 69.1,47.1"/><polygon points="77.6,74.0 86.2,78.9 86.2,88.7 77.6,93.6 69.1,88.7 69.1,78.9"/><polygon points="96.0,74.0 104.5,78.9 104.5,88.7 96.0,93.6 87.5,88.7 87.5,78.9"/><polygon points="114.4,74.0 122.9,78.9 122.9,88.7 114.4,93.6 105.8,88.7 105.8,78.9"/><polygon points="123.5,58.1 132.1,63.0 132.1,72.8 123.5,77.8 115.0,72.8 115.0,63.0"/><polygon points="132.7,42.1 141.2,47.1 141.2,56.9 132.7,61.9 124.2,56.9 124.2,47.1"/><polygon points="123.5,26.2 132.1,31.2 132.1,41.0 123.5,46.0 115.0,41.0 115.0,31.2"/><polygon points="114.4,10.4 122.9,15.3 122.9,25.1 114.4,30.1 105.8,25.1 105.8,15.3"/><polygon points="96.0,10.4 104.5,15.3 104.5,25.1 96.0,30.1 87.5,25.1 87.5,15.3"/><polygon points="77.6,10.4 86.2,15.3 86.2,25.1 77.6,30.1 69.1,25.1 69.1,15.3"/><polygon points="68.5,26.2 77.0,31.2 77.0,41.0 68.5,46.0 59.9,41.0 59.9,31.2"/><polygon points="59.3,42.1 67.8,47.1 67.8,56.9 59.3,61.9 50.8,56.9 50.8,47.1"/><polygon points="68.5,58.1 77.0,63.0 77.0,72.8 68.5,77.8 59.9,72.8 59.9,63.0"/>' +
+        '</g>' +
+        /* the aft optics housing that fills the array's empty middle */
+        '<polygon points="96.0,43.0 103.8,47.5 103.8,56.5 96.0,61.0 88.2,56.5 88.2,47.5" fill="#22201C" stroke="#4A443A" stroke-width="0.6"/>' +
+        '</svg>' + '</div>';
+
     var BEYOND = '<div class="jp-beyond">' +
         '<span class="jp-pale-dot"></span>' +
         '<p class="jp-caption">EARTH · 29 AU BEHIND YOU</p>' +
@@ -1302,6 +1334,9 @@
             if (PLANETS[s.planet]) {
                 if (s.planet === 'mars' && !s.el.querySelector('.jp-droplet')) {
                     s.el.insertAdjacentHTML('afterbegin', DROPLET);
+                }
+                if (s.planet === 'jupiter' && !s.el.querySelector('.jp-webb')) {
+                    s.el.insertAdjacentHTML('afterbegin', WEBB);
                 }
                 if (!s.el.querySelector('.jp-planet')) {
                     var planet = document.createElement('div');

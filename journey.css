@@ -1449,6 +1449,38 @@ html.journey .jp-moon-triton {
 }
 
 /* ------------------------------------------------------------
+   James Webb in the lower-left of Research, behind the glass.
+   ------------------------------------------------------------ */
+html.journey .jp-webb {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 0 20px rgba(226, 184, 92, 0.16));
+}
+
+html.journey-h .jp-webb {
+    left: 2%;
+    bottom: 2%;
+    transform: rotate(-11deg);
+}
+
+html.journey-h .jp-webb svg {
+    width: 188px;
+    height: auto;
+}
+
+html.journey-v .jp-webb {
+    left: 8px;
+    top: 8px;
+    transform: rotate(-11deg);
+}
+
+html.journey-v .jp-webb svg {
+    width: 92px;
+    height: auto;
+}
+
+/* ------------------------------------------------------------
    The droplet, hanging off the left of About. Perfectly still: that
    is the whole character of the thing.
    ------------------------------------------------------------ */
