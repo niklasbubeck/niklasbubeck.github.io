@@ -12,8 +12,13 @@
     var SETTLE_MS = 180;
     var JOURNEY_MQ = '(min-width: 821px) and (min-height: 560px)';
     var REDUCED_MQ = '(prefers-reduced-motion: reduce)';
-    /* threshold 40: a Firefox pixel-mode notch is ~48-57px; trackpad tails stay below it */
-    var WHEEL = { tail: 4, threshold: 40, lock: 850, arm: 350, decay: 200 };
+    /* threshold 40: a Firefox pixel-mode notch is ~48-57px; trackpad tails stay
+       below it. `lock` is only long enough to stop one notch firing twice — a
+       trackpad's momentum tail is held off by `quiet` instead, which waits for
+       the wheel to actually stop rather than for a fixed time to elapse. That
+       is what keeps a deliberate second scroll responsive: the old fixed 850ms
+       lock swallowed it, so the page felt like it was ignoring you. */
+    var WHEEL = { tail: 4, threshold: 40, lock: 180, arm: 180, decay: 200, quiet: 120 };
     var FIELDS = 'input, textarea, select, [contenteditable]';
     var CAROUSELS = '.publications-viewport, .github-projects-viewport'; /* native horizontal scrollers */
     var CUE_H = '<span>Scroll, swipe or press → to launch</span><i class="fas fa-chevron-right"></i>';
@@ -65,6 +70,8 @@
     var edgeArmedUntil = 0;
     var acc = 0;
     var lastWheelAt = 0;
+    var quietUntil = 0;   /* a gesture is still running: wait for it to stop */
+    var quietTimer = 0;
 
     /* ---- helpers ---- */
     function emit(name, detail) {
@@ -275,6 +282,56 @@
         }
     }
 
+    /* ---- keep only the visible embeds alive --------------------------------
+       The publication slides embed a PDF viewer each and the project slides
+       embed the project's own live site — twelve nested documents, every one
+       with its own style engine, layers and scripts. `loading="lazy"` defers
+       them, but in a horizontal track every panel sits within a viewport of
+       the fold, so they all wake and then stay awake. This parks the src of
+       any embed that is not on screen and restores it when it scrolls back. */
+    function tameFrames() {
+        if (!window.IntersectionObserver) { return; }
+        var frames = document.querySelectorAll('.publications-viewport iframe, .github-projects-viewport iframe');
+        for (var k = 0; k < frames.length; k++) {
+            var f = frames[k];
+            if (f.getAttribute('data-tamed')) { continue; }
+            f.setAttribute('data-tamed', '1');
+            var scroller = closest(f, '.publications-viewport, .github-projects-viewport');
+            new IntersectionObserver(onFrameSeen, { root: scroller, threshold: 0.01 }).observe(f);
+        }
+    }
+
+    function onFrameSeen(entries) {
+        for (var k = 0; k < entries.length; k++) {
+            entries[k].target.__inCarousel = entries[k].isIntersecting;
+            applyFrame(entries[k].target);
+        }
+    }
+
+    /* live only when it is both the carousel's current slide and on the planet
+       you are actually standing on, so reading About runs no PDF viewer and no
+       embedded site at all */
+    function applyFrame(f) {
+        var panel = closest(f, '.panel');
+        var here = panel && stops[journey.index] && stops[journey.index].el === panel;
+        if (f.__inCarousel && here) {
+            var parked = f.getAttribute('data-src');
+            if (parked) {
+                f.removeAttribute('data-src');
+                f.src = parked;
+            }
+        } else if (f.src && f.src !== 'about:blank') {
+            f.setAttribute('data-src', f.src);
+            f.src = 'about:blank';
+        }
+    }
+
+    function applyFrames() {
+        tameFrames();
+        var frames = document.querySelectorAll('.publications-viewport iframe, .github-projects-viewport iframe');
+        for (var k = 0; k < frames.length; k++) { applyFrame(frames[k]); }
+    }
+
     function applyCue() {
         if (cue) { cue.innerHTML = mode === 'h' ? CUE_H : cueHtml; }
     }
@@ -349,13 +406,60 @@
         }
         setIndex(i);
         if (mode === 'h') {
-            track.scrollTo({ left: i * track.clientWidth, behavior: instant ? 'auto' : 'smooth' });
+            flyTo(i * track.clientWidth, instant);
         } else if (instant) {
             jumpWindow(Math.max(0, stops[i].el.offsetTop - NAV_H));
         } else {
             window.scrollTo({ top: Math.max(0, stops[i].el.offsetTop - NAV_H), behavior: 'smooth' });
         }
         armSettle();
+    }
+
+    /* The browser's own smooth scroll takes ~700ms to cross a panel, which is
+       most of what made travelling feel heavy. This tween is ~400ms and can be
+       re-aimed mid-flight, so a second gesture redirects the trip instead of
+       queueing behind it. Snapping is suspended while it runs — otherwise the
+       snap container fights every frame we set scrollLeft — and restored at the
+       end, which also re-snaps if the tween is interrupted. */
+    var FLY_MS = 400;
+    var fly = null;
+
+    function flyTo(left, instant) {
+        var from = track.scrollLeft;
+        var max = track.scrollWidth - track.clientWidth;
+        var to = Math.max(0, Math.min(max, left));
+        if (instant || Math.abs(to - from) < 2 || mqReduced.matches) {
+            endFly();
+            track.scrollLeft = to;
+            return;
+        }
+        if (!fly) { track.style.scrollSnapType = 'none'; }
+        fly = { from: from, to: to, t0: stamp(), raf: fly ? fly.raf : 0 };
+        if (!fly.raf) { fly.raf = requestAnimationFrame(flyStep); }
+    }
+
+    function flyStep() {
+        if (!fly) { return; }
+        var k = Math.min(1, (stamp() - fly.t0) / FLY_MS);
+        var e = 1 - Math.pow(1 - k, 3);   /* ease-out cubic */
+        track.scrollLeft = fly.from + (fly.to - fly.from) * e;
+        if (k < 1) {
+            fly.raf = requestAnimationFrame(flyStep);
+        } else {
+            endFly();
+        }
+    }
+
+    function endFly() {
+        if (fly) {
+            cancelAnimationFrame(fly.raf);
+            fly = null;
+            track.style.scrollSnapType = '';
+        }
+    }
+
+    function stamp() {
+        return window.performance && performance.now ? performance.now() : Date.now();
     }
 
     function goToId(id) {
@@ -428,6 +532,16 @@
         var now = Date.now();
         var unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? window.innerHeight : 1;
         var d = (horizontal ? e.deltaX : e.deltaY) * unit;
+        /* after a page, ignore the rest of this gesture: every further event
+           pushes the quiet deadline out, so the momentum tail never pages
+           again, but a real pause of `quiet` ms hands control straight back */
+        if (quietUntil) {
+            e.preventDefault();
+            quietUntil = now + WHEEL.quiet;
+            clearTimeout(quietTimer);
+            quietTimer = setTimeout(releaseWheel, WHEEL.quiet);
+            return;
+        }
         if (now < lockUntil) { e.preventDefault(); return; }
         var card = stops[journey.index].card;
         if (!horizontal && canScroll(card, d)) {
@@ -448,8 +562,17 @@
         if (Math.abs(acc) >= WHEEL.threshold) {
             goTo(journey.index + (acc > 0 ? 1 : -1));
             lockUntil = now + WHEEL.lock;
+            quietUntil = now + WHEEL.quiet;
+            clearTimeout(quietTimer);
+            quietTimer = setTimeout(releaseWheel, WHEEL.quiet);
             acc = 0;
         }
+    }
+
+    function releaseWheel() {
+        quietTimer = 0;
+        quietUntil = 0;
+        acc = 0;
     }
 
     function onKey(e) {
@@ -571,6 +694,12 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('scrollend', settle);
     track.addEventListener('wheel', onWheel, { passive: false });
+    track.addEventListener('touchstart', endFly, { passive: true });
+    /* the carousels render after their fetches, so watch for the embeds arriving */
+    if (window.MutationObserver) {
+        new MutationObserver(tameFrames).observe(document.body, { childList: true, subtree: true });
+    }
+    document.addEventListener('journey:arrive', applyFrames);
     window.addEventListener('keydown', onKey);
     document.addEventListener('click', onClick);
     window.addEventListener('hashchange', onHashChange);
