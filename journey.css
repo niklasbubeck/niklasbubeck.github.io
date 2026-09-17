@@ -146,6 +146,76 @@ html.journey-v .journey-sky-near {
     translate: 0 calc(var(--journey-p, 0) * var(--sky-shift, 0px));
 }
 
+/* ------------------------------------------------------------
+   Dark forest: after ten still seconds the stars go out. Only the
+   backdrop dims — every card keeps its own contrast, so whatever you
+   stopped to read stays exactly as readable as it was.
+   ------------------------------------------------------------ */
+html.journey .journey-sky-far,
+html.journey .journey-sky-near,
+html.journey .jp-planet,
+html.journey .jp-droplet,
+html.journey .jr-pilot {
+    transition: opacity 2.4s ease;
+}
+
+html.journey .journey-sky-base {
+    transition: filter 2.4s ease;
+}
+
+html.journey-dark .journey-sky-far,
+html.journey-dark .journey-sky-near {
+    opacity: 0.08;
+}
+
+html.journey-dark .journey-sky-base {
+    filter: brightness(0.5);
+}
+
+html.journey-dark .jp-planet,
+html.journey-dark .jp-droplet {
+    opacity: 0.3;
+}
+
+html.journey-dark .jr-pilot {
+    opacity: 0.45;
+}
+
+html.journey-dark .journey-twinkle {
+    animation: none;
+    opacity: 0.12;
+}
+
+.journey-forest {
+    display: none;
+}
+
+/* It lives in the empty band between the navbar and the card, the one strip
+   that is never text — a line of it over whatever you stopped to read would
+   be exactly the wrong thing. Phones have no such strip, so they just dim. */
+html.journey-h .journey-forest {
+    display: block;
+    position: fixed;
+    left: 50%;
+    top: calc(var(--nav-h) + var(--sky-band) / 2);
+    transform: translate(-50%, -50%);
+    margin: 0;
+    z-index: 950;
+    color: rgba(226, 216, 200, 0.5);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.6s ease;
+}
+
+html.journey-dark .journey-forest {
+    opacity: 1;
+    transition: opacity 2.4s ease 1.2s;
+}
+
 /* A few stars breathe, at different rates, so the sky is alive without
    anything sliding. These are the only animations left in the backdrop. */
 html.journey .journey-twinkle {
@@ -1376,6 +1446,39 @@ html.journey .jp-moon-triton {
     --jp-tilt: 28deg;
     --jp-t: 26s;
     --jp-dir: reverse;
+}
+
+/* ------------------------------------------------------------
+   The droplet, hanging off the left of About. Perfectly still: that
+   is the whole character of the thing.
+   ------------------------------------------------------------ */
+html.journey .jp-droplet {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 0 16px rgba(150, 180, 214, 0.22));
+}
+
+html.journey-h .jp-droplet {
+    left: 2.5%;
+    top: 44%;
+    transform: rotate(-9deg);
+}
+
+html.journey-h .jp-droplet svg {
+    width: 128px;
+    height: auto;
+}
+
+html.journey-v .jp-droplet {
+    left: 10px;
+    top: 26px;
+    transform: rotate(-12deg);
+}
+
+html.journey-v .jp-droplet svg {
+    width: 76px;
+    height: auto;
 }
 
 /* ------------------------------------------------------------

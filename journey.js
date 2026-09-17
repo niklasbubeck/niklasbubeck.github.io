@@ -332,6 +332,40 @@
         for (var k = 0; k < frames.length; k++) { applyFrame(frames[k]); }
     }
 
+    /* ---- the dark forest ---------------------------------------------------
+       Ten seconds without a touch and the stars go out, because the ones still
+       shining are the ones that have not learned to hide yet. Any input at all
+       brings them back. Only the sky dims — the cards you are reading do not. */
+    var FOREST_MS = 10000;
+    var forestTimer = 0;
+    var forestArmedAt = 0;
+    var forest = null;
+
+    function buildForest() {
+        forest = document.createElement('p');
+        forest.className = 'journey-forest';
+        forest.setAttribute('aria-hidden', 'true');
+        forest.textContent = 'The universe is a dark forest.';
+        document.body.appendChild(forest);
+    }
+
+    function enterForest() {
+        forestTimer = 0;
+        if (journey.active) { root.classList.add('journey-dark'); }
+    }
+
+    function stirForest() {
+        if (root.classList.contains('journey-dark')) {
+            root.classList.remove('journey-dark');
+        }
+        /* pointermove fires per frame: only re-arm the timer a few times a second */
+        var t = stamp();
+        if (forestTimer && t - forestArmedAt < 400) { return; }
+        forestArmedAt = t;
+        clearTimeout(forestTimer);
+        forestTimer = setTimeout(enterForest, FOREST_MS);
+    }
+
     function applyCue() {
         if (cue) { cue.innerHTML = mode === 'h' ? CUE_H : cueHtml; }
     }
@@ -695,6 +729,13 @@
     window.addEventListener('scrollend', settle);
     track.addEventListener('wheel', onWheel, { passive: false });
     track.addEventListener('touchstart', endFly, { passive: true });
+    buildForest();
+    ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'focusin'].forEach(function (evt) {
+        window.addEventListener(evt, stirForest, { passive: true });
+    });
+    track.addEventListener('scroll', stirForest, { passive: true });
+    window.addEventListener('scroll', stirForest, { passive: true });
+    stirForest();
     /* the carousels render after their fetches, so watch for the embeds arriving */
     if (window.MutationObserver) {
         new MutationObserver(tameFrames).observe(document.body, { childList: true, subtree: true });
@@ -1216,6 +1257,30 @@
                '<div class="jp-kuiper">' + html + '</div>';
     }
 
+    /* The droplet: Trisolaris's probe, a teardrop of strong-interaction matter
+       polished to a perfect mirror. It hangs on the left of About, motionless,
+       which is exactly what it does right up until it stops being motionless. */
+    var DROPLET = '<div class="jp-droplet" aria-hidden="true">' +
+        '<svg viewBox="0 0 132 56" width="132" height="56" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+        '<linearGradient id="jpDropSkin" x1="0.12" y1="0" x2="0.82" y2="1">' +
+        '<stop offset="0" stop-color="#F4F7FA"/>' +
+        '<stop offset="0.18" stop-color="#AEBECE"/>' +
+        '<stop offset="0.44" stop-color="#4E5F74"/>' +
+        '<stop offset="0.68" stop-color="#1E2836"/>' +
+        '<stop offset="0.88" stop-color="#3B4B5F"/>' +
+        '<stop offset="1" stop-color="#8CA0B4"/>' +
+        '</linearGradient>' +
+        '<radialGradient id="jpDropSpec" cx="0.5" cy="0.5" r="0.5">' +
+        '<stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/>' +
+        '<stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>' +
+        '</radialGradient>' +
+        '</defs>' +
+        '<path d="M 130 28 C 100 9, 62 2, 28 2 A 26 26 0 1 0 28 54 C 62 54, 100 47, 130 28 Z" fill="url(#jpDropSkin)"/>' +
+        '<ellipse cx="22" cy="17" rx="11" ry="6" fill="url(#jpDropSpec)"/>' +
+        '<ellipse cx="74" cy="40" rx="20" ry="3" fill="#FFFFFF" opacity="0.13"/>' +
+        '</svg></div>';
+
     var BEYOND = '<div class="jp-beyond">' +
         '<span class="jp-pale-dot"></span>' +
         '<p class="jp-caption">EARTH · 29 AU BEHIND YOU</p>' +
@@ -1235,6 +1300,9 @@
         for (var i = 0; i < stops.length; i++) {
             var s = stops[i];
             if (PLANETS[s.planet]) {
+                if (s.planet === 'mars' && !s.el.querySelector('.jp-droplet')) {
+                    s.el.insertAdjacentHTML('afterbegin', DROPLET);
+                }
                 if (!s.el.querySelector('.jp-planet')) {
                     var planet = document.createElement('div');
                     planet.className = 'jp-planet jp-' + s.planet;
