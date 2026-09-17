@@ -14,13 +14,17 @@ html.journey {
     --card-w: min(1120px, calc(100vw - 64px));
 
     /* The logbook cards are glass, not paper: the sky shows through them and the
-       stars keep drifting behind the text. --glass-tint is the one dial — raise it
-       for more paper, lower it for more space (the blur keeps text legible either
-       way). --glass-solid is the same tint opaque, for the "more below" fade. */
-    --glass-tint: 0.26;
+       stars stay visible behind the text. --glass-tint is the one dial — raise it
+       for more paper, lower it for more space. --glass-solid is the same tint
+       opaque, for the "more below" fade.
+
+       No backdrop-filter: a blurred backdrop has to be recomputed on every frame
+       in which anything on the page animates, and this page always has something
+       moving, so it cost ~36 of the 60 frames per second at rest. The tint does
+       the legibility work on its own. */
+    --glass-tint: 0.34;
     --glass-bg: rgba(14, 14, 18, var(--glass-tint));
-    --glass-solid: rgba(14, 14, 18, 0.88);
-    --glass-blur: 14px;
+    --glass-solid: rgba(14, 14, 18, 0.9);
     --glass-edge: rgba(237, 230, 216, 0.14);
 }
 
@@ -78,14 +82,6 @@ html.journey .panel-card ::placeholder {
     opacity: 1;
 }
 
-/* In flight the blur comes off: a backdrop filter costs a compositing pass per
-   frame whatever its radius, and the cards are only read at rest. The tint stays,
-   so only the sharpness of the stars behind the glass changes. */
-html.journey-travelling.journey-h .panel-card,
-html.journey-travelling.journey-v .panel-card {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-}
 
 /* Carousel footers sit above the "more below" fade so the dots and the
    "1 / 9" counter stay crisp when the card still has content below */
@@ -270,8 +266,6 @@ html.journey-h .panel-card {
     scrollbar-width: thin;
     z-index: 2;
     background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
-    backdrop-filter: blur(var(--glass-blur)) saturate(120%);
     border: 1px solid var(--glass-edge);
     border-radius: 18px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
@@ -444,8 +438,6 @@ html.journey-v .panel-card {
     max-height: none;
     overflow: visible;
     background: var(--glass-bg);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(120%);
-    backdrop-filter: blur(var(--glass-blur)) saturate(120%);
     border: 1px solid var(--glass-edge);
     border-radius: 16px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);

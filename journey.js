@@ -57,7 +57,6 @@
     var arrivedIndex = -1;
     var initialIndex = indexOf(location.hash.slice(1)); /* stop named by the URL at load */
     var settleTimer = 0;
-    var travelling = false; /* the track is moving: cards drop their blur */
     var resizeTimer = 0;
     var rafId = 0;
     var lastPos = -1;
@@ -242,8 +241,6 @@
     function settle() {
         clearTimeout(settleTimer);
         settleTimer = 0;
-        travelling = false;
-        root.classList.remove('journey-travelling');
         if (!journey.active) { return; }
         /* the first arrive trusts the deep link: async content may still be shifting offsets */
         var i = arrivedIndex < 0 && initialIndex >= 0 ? initialIndex : indexFromPos();
@@ -285,13 +282,6 @@
 
     function onScroll() {
         if (!journey.active) { return; }
-        /* The glass cards drop their backdrop blur while the sky is moving: the
-           filter costs a compositing pass per frame (its radius does not matter)
-           and nobody reads a card mid-flight. settle() puts it back. */
-        if (!travelling) {
-            travelling = true;
-            root.classList.add('journey-travelling');
-        }
         kick();
         armSettle();
     }
